@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:signalr_chat/Models/ChatContent.dart';
 
 class MessageView extends StatefulWidget {
   const MessageView({super.key});
@@ -18,57 +19,26 @@ class _MessageViewState extends State<MessageView> {
 
     Map<String, dynamic> key = data.keys.elementAt(0);
     Map<String, dynamic> value = data[key]!;
-
-    var userAvatar = value['avatar'].toString();
     var chatContents = key['chatContents'];
 
-    //print("Received content: $");
+    print("Received content: $chatContents");
     //print("Received info: $value");
 
     return Scaffold(
-        body: Column(children: <Widget>[
-          Container(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-            SafeArea(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(height: 15.0),
-                  //Header
-                  Container(
-                    color: Colors.grey[200],
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 4.0),
-                        UserAvatar(userAvatar: userAvatar),
-                        const SizedBox(height: 8.0,),
-                        Container(
-                          height: 40.0,
-                          child:
-                              Flexible(
-                                child: Text(
-                                "${value['firstName']} ${value['middleName']} ${value['lastName']}",
-                                style: TextStyle(fontSize: 18),
-                              )),
-                          )
-                      ],
-                    ),
-                  ),
-                ],
-            ),
-            )]
-          ),
-        ),
+        appBar: AppBar(
+            backgroundColor: Colors.blue[400],
+          centerTitle: true,
+          title: Text(
+        "${value['firstName']} ${value['middleName']} ${value['lastName']}")
 
+        ),
+        body: Column(children: <Widget>[
       Expanded(
           child: ListView.builder(
-        itemCount: data.length,
+        itemCount: chatContents.length,
         itemBuilder: (context, index) {
-          return MessageCard(
-              leading: value['avatar'],
-              title: chatContents[index]['message']);
+          return MessengerCard(avatar: value['avatar'],
+              content: Chatcontent.fromJson(chatContents[index]));
         },
       )),
       Container(
@@ -97,15 +67,19 @@ class _MessageViewState extends State<MessageView> {
   }
 }
 
-class MessageCard extends StatelessWidget {
-  final String leading;
-  final String title;
+class MessengerCard extends StatelessWidget {
+  final String avatar;
+  final Chatcontent content;
 
-  const MessageCard({
+  const MessengerCard({
     super.key,
-    required this.leading,
-    required this.title,
+    required this.avatar,
+    required this.content
   });
+
+  bool MessageIsFromUser(id) {
+    return id == 1491; //TOdo: get userId from storage
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -114,14 +88,34 @@ class MessageCard extends StatelessWidget {
           borderRadius: BorderRadius.zero),
       elevation: 0,
       child: ListTile(
-        leading: UserAvatar(userAvatar: leading),
-        title: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Container(
-            color: Colors.lightBlueAccent,
-            child: Text('$title'),
-          ),
-        ),
+        leading: !MessageIsFromUser(content.AuthorId) ? UserAvatar(userAvatar: avatar) : null,
+        trailing: MessageIsFromUser(content.AuthorId) ? UserAvatar(userAvatar: avatar) : null,
+        title:
+        Wrap(
+            children: [
+              Row(
+                mainAxisAlignment: MessageIsFromUser(content.AuthorId) ?
+                        MainAxisAlignment.end : MainAxisAlignment.start,
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Colors.transparent,
+                      boxShadow: const [
+                        BoxShadow(color: Color.fromARGB(60, 0, 0, 196), spreadRadius: 3),
+                      ],
+                    ),
+                    child:
+                    Padding(
+                      padding:
+                      const EdgeInsets.symmetric
+                        (vertical: 10.0, horizontal: 7.0),
+                      child: Text('${content.Message}'),
+                    ),
+                  ),
+                ],
+              ),
+            ]),
       ),
     );
   }
