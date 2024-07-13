@@ -1,14 +1,10 @@
 class User {
   String email;
   String password;
+  String? token;
+  String? guid;
 
-  User({required this.email, required this.password});
-
-  Future<bool> loginUser() async {
-    print("Logging in user.... with email: " + email + "\nPassword: " + password);
-    //Todo: Send request to server and handle login
-    return true;
-  }
+  User({required this.email, required this.password, this.token, this.guid});
 
   setUser(String password, String email) {
     this.email = email;
@@ -16,6 +12,10 @@ class User {
   }
 
   getUser() {
-    return User(email: this.email, password: this.password);
+    return User(
+        email: this.email,
+        password: this.password,
+        token: this.token,
+        guid: this.guid);
   }
 }
