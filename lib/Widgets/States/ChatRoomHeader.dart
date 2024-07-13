@@ -12,21 +12,25 @@ class ChatRoomHeader extends StatelessWidget implements PreferredSizeWidget {
         backgroundColor: const Color(0xFF39B0D2),
         centerTitle: true,
         title: const Text('Chats'),
-        leading: const CircleAvatar(
-          backgroundImage:
-              AssetImage('assets/blank_profile_pic.png') as ImageProvider,
+        leading: GestureDetector(
+          onTap: () => Scaffold.of(context).openDrawer(),
+          child: const CircleAvatar(
+            backgroundImage:
+                AssetImage('assets/blank_profile_pic.png') as ImageProvider,
+          ),
         ),
         actions: <Widget>[
-          Builder(
-            builder: (context) {
-              return IconButton(
-                icon: const Icon(Icons.menu),
-                onPressed: () {
-                  Scaffold.of(context).openDrawer();
-                },
-              );
-            },
-          ),
+          //Unused hamburger icon, on press opens the drawer
+          // Builder(
+          //   builder: (context) {
+          //     return IconButton(
+          //       icon: const Icon(Icons.menu),
+          //       onPressed: () {
+          //         Scaffold.of(context).openDrawer();
+          //       },
+          //     );
+          //   },
+          // ),
           IconButton(
             icon: const Icon(Icons.add),
             tooltip: 'Go to the next page',
