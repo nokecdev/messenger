@@ -16,11 +16,6 @@ class _ChatRoomsDrawerState extends State<ChatRoomsDrawer> {
     });
   }
 
-  void _onLogoutPressed() {
-    //TODO: clear data from store, then logout user
-    print("logout user...");
-  }
-
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -28,7 +23,6 @@ class _ChatRoomsDrawerState extends State<ChatRoomsDrawer> {
       // through the options in the drawer if there isn't enough vertical
       // space to fit everything.
       child: ListView(
-        // Important: Remove any padding from the ListView.
         padding: EdgeInsets.zero,
         children: [
           const UserAccountsDrawerHeader(
@@ -72,11 +66,10 @@ class _ChatRoomsDrawerState extends State<ChatRoomsDrawer> {
             title: const Text('Logout'),
             selected: _selectedIndex == 2,
             onTap: () {
-              _onLogoutPressed();
+              //TODO: delete user data from store
+              Navigator.pushReplacementNamed(context, '/login');
               // Update the state of the app
               _onItemTapped(2);
-              // Then close the drawer
-              Navigator.pop(context);
             },
           ),
         ],
