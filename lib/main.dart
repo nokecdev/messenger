@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:signalr_chat/Widgets/ChatRoomView.dart';
+import 'package:signalr_chat/Widgets/SearchView.dart';
 import 'package:signalr_chat/Widgets/States/LoadingState.dart';
 import 'package:signalr_chat/Widgets/LoadingView.dart';
 import 'package:signalr_chat/Widgets/LoginView.dart';
@@ -35,12 +36,18 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData(
+        drawerTheme: const DrawerThemeData(
+          backgroundColor: Colors.transparent,
+        ),
+      ),
       initialRoute: '/login',
       routes: {
         '/loading': (context) => const LoadingView(),
         '/login': (context) => const LoginView(),
         '/chatrooms': (context) => const ChatRoomView(),
         '/messages': (context) => const MessageView(),
+        '/search': (context) => const SearchView()
       },
     );
   }
