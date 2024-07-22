@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:provider/provider.dart';
 import 'package:signalr_chat/Services/ApiService.dart';
 import 'package:signalr_chat/Widgets/States/ChatRoomHeader.dart';
 import 'package:signalr_chat/Widgets/States/ChatRoomsDrawer.dart';
+import 'package:signalr_chat/Widgets/States/GlobalTheme.dart';
+import 'package:signalr_chat/Widgets/States/ThemeNotifier.dart';
 
 class ChatRoomView extends StatefulWidget {
   const ChatRoomView({super.key});
@@ -11,7 +13,7 @@ class ChatRoomView extends StatefulWidget {
   State<ChatRoomView> createState() => _ChatRoomViewState();
 }
 
-class _ChatRoomViewState extends State<ChatRoomView> {
+class _ChatRoomViewState extends State<ChatRoomView> with ChangeNotifier {
   //Map userData = {};
   //late Map chatRooms;
   Map<Map<String, dynamic>, Map<String, dynamic>> mappedData = {};
@@ -24,19 +26,13 @@ class _ChatRoomViewState extends State<ChatRoomView> {
     //chatRooms = ModalRoute.of(context)!.settings.arguments as Map;
     mappedData = ModalRoute.of(context)!.settings.arguments
         as Map<Map<String, dynamic>, Map<String, dynamic>>;
+    ThemeNotifier themeNotifier = Provider.of<ThemeNotifier>(context);
 
     return Scaffold(
         drawer: const ChatRoomsDrawer(),
         appBar: const ChatRoomHeader(),
         body: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF39B0D2), Color(0xFF8277EE)],
-              stops: [0, 1],
-              begin: AlignmentDirectional(0, -1),
-              end: AlignmentDirectional(0, 1),
-            ),
-          ),
+          decoration: BoxDecoration(gradient: themeNotifier.getGradient()),
           child: Column(children: <Widget>[
             Container(
               child: Padding(
@@ -80,7 +76,6 @@ class _ChatRoomViewState extends State<ChatRoomView> {
                             : const AssetImage('assets/blank_profile_pic.png')
                                 as ImageProvider,
                       ),
-                      textColor: Colors.white,
                       title: Text("${chatContents[0]['message']}"),
                       subtitle: Text("${chatContents[0]['sentDate']}"),
                       trailing: const Icon(

@@ -152,6 +152,7 @@ class _LoginFormState extends State<LoginForm> {
                   if (text == null || text.isEmpty) {
                     emailIsValid = false;
                   }
+                  return null;
                 }),
             const SizedBox(height: 32.0),
             TextFormField(
@@ -205,12 +206,11 @@ class _LoginFormState extends State<LoginForm> {
               ElevatedButton(
                   onPressed: _onLoginPressed,
                   style: ButtonStyle(
-                      shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-                          RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5.0),
-                              side: const BorderSide(color: Colors.black))),
-                      backgroundColor:
-                          WidgetStateProperty.all(Colors.blue[200])),
+                    shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5.0),
+                            side: const BorderSide(color: Colors.black))),
+                  ),
                   child: const Text('Login'))
             ])
           ]),

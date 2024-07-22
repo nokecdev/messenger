@@ -99,25 +99,50 @@ class _MessageViewState extends State<MessageView> {
                   color: const Color.fromARGB(88, 98, 90, 170),
                   padding: const EdgeInsets.symmetric(vertical: 2.0),
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisSize: MainAxisSize.max,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: <Widget>[
-                          IconButton(
-                              icon: const Icon(Icons.mic),
+                      Container(
+                        decoration: const BoxDecoration(
+                            gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          stops: [0.1, 0.4, 0.9],
+                          colors: [
+                            Color.fromARGB(87, 231, 229, 255),
+                            Color.fromARGB(88, 98, 90, 170),
+                            Color.fromARGB(87, 231, 229, 255),
+                          ],
+                        )),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: <Widget>[
+                            IconButton(
+                                padding: EdgeInsets.all(0.0),
+                                iconSize: 20.0,
+                                icon: const Icon(Icons.mic),
+                                onPressed: () {
+                                  print("microphone recording");
+                                },
+                                color: Colors.black),
+                            IconButton(
+                                padding: EdgeInsets.all(0.0),
+                                iconSize: 20.0,
+                                icon: const Icon(Icons.image),
+                                onPressed: () {
+                                  print("image sending");
+                                },
+                                color: Colors.black),
+                            IconButton(
+                              padding: EdgeInsets.all(10.0),
+                              iconSize: 20.0,
+                              icon: const Icon(Icons.emoji_emotions),
+                              color: Colors.black,
                               onPressed: () {
-                                print("microphone recording");
+                                print("emoji sending");
                               },
-                              color: Colors.blue),
-                          IconButton(
-                              icon: const Icon(Icons.image),
-                              onPressed: () {
-                                print("image sending");
-                              },
-                              color: Colors.black),
-                          const Icon(Icons.person, color: Colors.black),
-                        ],
+                            ),
+                          ],
+                        ),
                       ),
                       Row(children: [
                         Expanded(
@@ -128,7 +153,8 @@ class _MessageViewState extends State<MessageView> {
                               decoration: const InputDecoration(
                                 labelStyle: TextStyle(
                                     fontSize: 20.0, color: Colors.white),
-                                fillColor: Colors.blue,
+                                fillColor: Color.fromARGB(255, 119, 121, 238),
+                                filled: true,
                                 border: OutlineInputBorder(
                                     borderSide:
                                         BorderSide(color: Colors.black)),
@@ -138,6 +164,7 @@ class _MessageViewState extends State<MessageView> {
                         ),
                         IconButton(
                           icon: const Icon(Icons.send),
+                          color: Colors.black,
                           iconSize: 20.0,
                           onPressed: () {},
                         )

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:signalr_chat/Storage/UserStorage.dart';
+import 'package:signalr_chat/Widgets/States/GlobalTheme.dart';
 import 'package:signalr_chat/Widgets/States/LoginFormState.dart';
+import 'package:signalr_chat/Widgets/States/ThemeNotifier.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -10,10 +13,12 @@ class LoginView extends StatefulWidget {
 }
 
 class _LoginViewState extends State<LoginView> {
-  final UserStorage userStorage = new UserStorage();
+  final UserStorage userStorage = UserStorage();
+  final GlobalTheme theme = GlobalTheme();
 
   @override
   Widget build(BuildContext context) {
+    ThemeNotifier themeNotifier = Provider.of<ThemeNotifier>(context);
     return Scaffold(
       resizeToAvoidBottomInset: true,
       body: SingleChildScrollView(
@@ -21,14 +26,8 @@ class _LoginViewState extends State<LoginView> {
           height: MediaQuery.of(context)
               .size
               .height, // Set the height to the full screen height
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF39B0D2), Color(0xFF8277EE)],
-              stops: [0, 1],
-              begin: AlignmentDirectional(0, -1),
-              end: AlignmentDirectional(0, 1),
-            ),
-          ),
+
+          decoration: BoxDecoration(gradient: themeNotifier.getGradient()),
           child: Column(
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.center,
