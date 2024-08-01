@@ -20,62 +20,33 @@ class _LoginViewState extends State<LoginView> {
   Widget build(BuildContext context) {
     ThemeNotifier themeNotifier = Provider.of<ThemeNotifier>(context);
     return Scaffold(
-      resizeToAvoidBottomInset: true,
-      body: SingleChildScrollView(
-        child: Container(
-          height: MediaQuery.of(context)
-              .size
-              .height, // Set the height to the full screen height
+        resizeToAvoidBottomInset: true,
+        body: LayoutBuilder(builder: (context, constraints) {
+          double screenWidth = constraints.maxWidth;
 
-          decoration: BoxDecoration(gradient: themeNotifier.getGradient()),
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(0, 32, 0, 120),
-                child: Row(
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Stack(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.network(
-                            'https://picsum.photos/seed/428/600',
-                            width: 392,
-                            height: 309,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ],
+          // Define a threshold for screen width to determine small and large screens
+          bool isSmallScreen = screenWidth < 600;
+          return Container(
+            decoration: BoxDecoration(gradient: themeNotifier.getGradient()),
+            child: GridView.count(crossAxisCount: 1, children: <Widget>[
+              Container(
+                child: Container(
+                  padding: isSmallScreen
+                      ? EdgeInsets.fromLTRB(20.0, 40.0, 20.0, 50.0)
+                      : EdgeInsets.fromLTRB(20.0, 40.0, 20.0, 50.0),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      'https://picsum.photos/seed/428/600',
+                      height: isSmallScreen ? screenWidth * 0.5 : null,
+                      fit: BoxFit.cover,
                     ),
-                  ],
+                  ),
                 ),
               ),
-              Row(
-                children: [Expanded(child: LoginForm())],
-              ),
-              const Row(
-                //TODO: redirect to website. The lost password option
-                // also can be used via the website
-                children: [
-                  Text('No account yet? Register',
-                      style: TextStyle(
-                        fontFamily: 'Readex Pro',
-                        color: Colors.white,
-                        letterSpacing: 0,
-                      )),
-                  SizedBox(
-                    height: 12.0,
-                  )
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+              LoginForm(),
+            ]),
+          );
+        }));
   }
 }

@@ -99,12 +99,27 @@ class _LoginFormState extends State<LoginForm> {
 
   @override
   Widget build(BuildContext context) {
+    double height = MediaQuery.sizeOf(context).height;
+    //print("height is : " + height.toString());
+
     return Form(
         key: _formKey,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 25.0),
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Builder(
+              builder: (context) {
+                if (height > 700) {
+                  return SizedBox(
+                    height: height * 0.1,
+                  );
+                }
+                return const SizedBox(
+                  height: 0.0,
+                );
+              },
+            ),
             TextFormField(
 
                 ///autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -212,7 +227,25 @@ class _LoginFormState extends State<LoginForm> {
                             side: const BorderSide(color: Colors.black))),
                   ),
                   child: const Text('Login'))
-            ])
+            ]),
+            Container(
+              padding: const EdgeInsets.all(8),
+              child: const Row(
+                children: [
+                  Text(
+                    'No account yet? Register',
+                    style: TextStyle(
+                      fontFamily: 'Readex Pro',
+                      color: Colors.white,
+                      letterSpacing: 0,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 12.0,
+                  )
+                ],
+              ),
+            ),
           ]),
         ));
   }
