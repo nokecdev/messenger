@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:signalr_chat/Services/ApiService.dart';
 import 'package:signalr_chat/Widgets/States/ChatRoomHeader.dart';
@@ -13,12 +14,18 @@ class ChatRoomView extends StatefulWidget {
   State<ChatRoomView> createState() => _ChatRoomViewState();
 }
 
-class _ChatRoomViewState extends State<ChatRoomView> with ChangeNotifier {
+class _ChatRoomViewState extends State<ChatRoomView> {
   //Map userData = {};
   //late Map chatRooms;
   Map<Map<String, dynamic>, Map<String, dynamic>> mappedData = {};
-  final _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
   final ApiService _apiService = ApiService();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +68,6 @@ class _ChatRoomViewState extends State<ChatRoomView> with ChangeNotifier {
                 var userAvatar = value['avatar'].toString();
                 var chatContents = key['chatContents'];
 
-                //print(chatContents[0]);
                 return Card(
                     color: Colors.transparent,
                     child: ListTile(

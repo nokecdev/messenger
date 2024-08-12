@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:signalr_chat/Models/ChatContent.dart';
+import 'package:signalr_chat/Widgets/States/ThemeNotifier.dart';
 
 class MessageView extends StatefulWidget {
   const MessageView({super.key});
@@ -21,6 +23,8 @@ class _MessageViewState extends State<MessageView> {
 
     Map<String, dynamic> key = data.keys.elementAt(0);
     Map<String, dynamic> value = data[key]!;
+    ThemeNotifier themeNotifier = Provider.of<ThemeNotifier>(context);
+
     var chatContents = key['chatContents'];
     var selectedIndex = 0;
     MenuItem? selectedMenu;
@@ -30,25 +34,12 @@ class _MessageViewState extends State<MessageView> {
 
     return Scaffold(
         appBar: AppBar(
-            backgroundColor: Colors.blue[400],
+            backgroundColor: themeNotifier.getAppBarColor(),
+            excludeHeaderSemantics: true,
             centerTitle: true,
             title: Text(
                 "${value['firstName']} ${value['middleName']} ${value['lastName']}"),
             actions: <Widget>[
-              // Builder(
-              //   builder: (context) {
-              //     return IconButton(
-              //       icon: const Icon(Icons.more_vert),
-              //       onPressed: () {
-              //         if (more_options.isOpen) {
-              //           more_options.close();
-              //         } else {
-              //           more_options.open();
-              //         }
-              //       },
-              //     );
-              //   },
-              // ),
               MenuAnchor(
                 builder: (BuildContext context, MenuController controller,
                     Widget? child) {
@@ -75,14 +66,7 @@ class _MessageViewState extends State<MessageView> {
               ),
             ]),
         body: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF39B0D2), Color(0xFF8277EE)],
-              stops: [0, 1],
-              begin: AlignmentDirectional(0, -1),
-              end: AlignmentDirectional(0, 1),
-            ),
-          ),
+          decoration: BoxDecoration(gradient: themeNotifier.getGradient()),
           child: Column(
             children: <Widget>[
               Expanded(
@@ -95,82 +79,7 @@ class _MessageViewState extends State<MessageView> {
                       content: Chatcontent.fromJson(chatContents[index]));
                 },
               )),
-              Container(
-                  color: const Color.fromARGB(88, 98, 90, 170),
-                  padding: const EdgeInsets.symmetric(vertical: 2.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      Container(
-                        decoration: const BoxDecoration(
-                            gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          stops: [0.1, 0.4, 0.9],
-                          colors: [
-                            Color.fromARGB(87, 231, 229, 255),
-                            Color.fromARGB(88, 98, 90, 170),
-                            Color.fromARGB(87, 231, 229, 255),
-                          ],
-                        )),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: <Widget>[
-                            IconButton(
-                                padding: EdgeInsets.all(0.0),
-                                iconSize: 20.0,
-                                icon: const Icon(Icons.mic),
-                                onPressed: () {
-                                  print("microphone recording");
-                                },
-                                color: Colors.black),
-                            IconButton(
-                                padding: EdgeInsets.all(0.0),
-                                iconSize: 20.0,
-                                icon: const Icon(Icons.image),
-                                onPressed: () {
-                                  print("image sending");
-                                },
-                                color: Colors.black),
-                            IconButton(
-                              padding: EdgeInsets.all(10.0),
-                              iconSize: 20.0,
-                              icon: const Icon(Icons.emoji_emotions),
-                              color: Colors.black,
-                              onPressed: () {
-                                print("emoji sending");
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                      Row(children: [
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextFormField(
-                              autocorrect: false,
-                              decoration: const InputDecoration(
-                                labelStyle: TextStyle(
-                                    fontSize: 20.0, color: Colors.white),
-                                fillColor: Color.fromARGB(255, 119, 121, 238),
-                                filled: true,
-                                border: OutlineInputBorder(
-                                    borderSide:
-                                        BorderSide(color: Colors.black)),
-                              ),
-                            ),
-                          ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.send),
-                          color: Colors.black,
-                          iconSize: 20.0,
-                          onPressed: () {},
-                        )
-                      ])
-                    ],
-                  )),
+              MyTextField()
             ],
           ),
         ));
@@ -208,8 +117,18 @@ class MessengerCard extends StatelessWidget {
             children: [
               Container(
                 decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    stops: [0.1, 0.4, 0.9],
+                    colors: [
+                      Color.fromARGB(179, 231, 229, 255),
+                      Color.fromARGB(88, 98, 90, 170),
+                      Color.fromARGB(87, 231, 229, 255),
+                    ],
+                  ),
                   borderRadius: BorderRadius.circular(10),
-                  color: Colors.transparent,
+                  //color: Colors.transparent,
                   boxShadow: const [
                     BoxShadow(
                         color: Color.fromARGB(60, 0, 0, 196), spreadRadius: 3),
@@ -237,11 +156,127 @@ class UserAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CircleAvatar(
-      backgroundImage: userAvatar.isNotEmpty
-          ? NetworkImage(
-              "https://storage.googleapis.com/socialstream/$userAvatar")
-          : const AssetImage('assets/blank_profile_pic.png') as ImageProvider,
+    return Container(
+      width: 50.0,
+      height: 50.0,
+      decoration: BoxDecoration(
+        color: const Color(0xff7c94b6),
+        image: DecorationImage(
+          image: userAvatar.isNotEmpty
+              ? NetworkImage(
+                  "https://storage.googleapis.com/socialstream/$userAvatar")
+              : const AssetImage('assets/blank_profile_pic.png')
+                  as ImageProvider,
+          fit: BoxFit.contain,
+        ),
+        borderRadius: BorderRadius.all(Radius.circular(50.0)),
+        border: Border.all(
+          color: const Color(0xff7c94b6),
+          width: 1.0,
+        ),
+      ),
     );
+  }
+}
+
+class MyTextField extends StatefulWidget {
+  const MyTextField({super.key});
+
+  @override
+  State<MyTextField> createState() => _MyTextFieldState();
+}
+
+class _MyTextFieldState extends State<MyTextField> {
+  @override
+  Widget build(BuildContext context) {
+    ThemeNotifier themeNotifier = Provider.of<ThemeNotifier>(context);
+
+    return Container(
+        color: Color.fromARGB(255, 82, 73, 161),
+        padding: const EdgeInsets.symmetric(vertical: 2.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Container(
+              decoration:
+                  BoxDecoration(gradient: themeNotifier.getTextBoxHeader()),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  IconButton(
+                      padding: EdgeInsets.all(0.0),
+                      iconSize: 20.0,
+                      icon: const Icon(Icons.mic),
+                      onPressed: () {
+                        print("microphone recording");
+                      },
+                      color: themeNotifier.theme == "dark"
+                          ? Colors.white
+                          : Colors.black),
+                  IconButton(
+                      padding: EdgeInsets.all(0.0),
+                      iconSize: 20.0,
+                      icon: const Icon(Icons.image),
+                      onPressed: () {
+                        print("image sending");
+                      },
+                      color: themeNotifier.theme == "dark"
+                          ? Colors.white
+                          : Colors.black),
+                  IconButton(
+                    padding: EdgeInsets.all(10.0),
+                    iconSize: 20.0,
+                    icon: const Icon(Icons.emoji_emotions),
+                    color: themeNotifier.theme == "dark"
+                        ? Colors.white
+                        : Colors.black,
+                    onPressed: () {
+                      print("emoji sending");
+                    },
+                  ),
+                ],
+              ),
+            ),
+            Row(children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(0.0),
+                  child: Container(
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16.0),
+                          boxShadow: const [
+                            BoxShadow(
+                                color: Colors.grey,
+                                blurRadius: 2.0,
+                                spreadRadius: 0.4)
+                          ]),
+                      child: TextField(
+                        decoration: InputDecoration(
+                            labelStyle: const TextStyle(
+                                fontSize: 20.0, color: Colors.white),
+                            fillColor: const Color.fromARGB(179, 67, 68, 105),
+                            isDense: true,
+                            counterText: "",
+                            contentPadding: const EdgeInsets.all(10.0),
+                            filled: true,
+                            suffixIcon: IconButton(
+                              icon: const Icon(Icons.send),
+                              color: Colors.black,
+                              iconSize: 20.0,
+                              onPressed: () {},
+                            ),
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                                borderSide: BorderSide.none)),
+                        textAlign: TextAlign.start,
+                        maxLines: 1,
+                        maxLength: 20,
+                      )),
+                ),
+              ),
+            ])
+          ],
+        ));
   }
 }

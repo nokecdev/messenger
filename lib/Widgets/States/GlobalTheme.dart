@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:signalr_chat/Storage/UserStorage.dart';
 
 class GlobalTheme with ChangeNotifier {
   final FlutterSecureStorage storage = const FlutterSecureStorage();
+  UserStorage userStorage = UserStorage();
+
   String _theme = "default";
 
   GlobalTheme() {
@@ -13,6 +16,7 @@ class GlobalTheme with ChangeNotifier {
 
   Future<void> _loadTheme() async {
     _theme = await storage.read(key: "theme") ?? "default";
+    print("theme is : " + theme);
     notifyListeners();
   }
 
@@ -42,8 +46,22 @@ class GlobalTheme with ChangeNotifier {
       case "light":
         return lightBackgroundGradient;
       case "default":
+        return defaultBackgroundGradient;
       default:
         return defaultBackgroundGradient;
+    }
+  }
+
+  LinearGradient getChatTextBoxHeader() {
+    switch (_theme) {
+      case "dark":
+        return textBoxHeaderDark;
+      case "light":
+        return textBoxHeaderLight;
+      case "default":
+        return textBoxHeaderDefault;
+      default:
+        return textBoxHeaderDefault;
     }
   }
 
@@ -96,6 +114,39 @@ class GlobalTheme with ChangeNotifier {
     stops: [0, 1],
     begin: AlignmentDirectional(0, -1),
     end: AlignmentDirectional(0, 1),
+  );
+
+  static const LinearGradient textBoxHeaderDefault = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    stops: [0.1, 0.4, 0.9],
+    colors: [
+      Color.fromARGB(87, 231, 229, 255),
+      Color.fromARGB(88, 98, 90, 170),
+      Colors.transparent,
+    ],
+  );
+
+  static const LinearGradient textBoxHeaderDark = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    stops: [0, 0.4, 0.9],
+    colors: [
+      Color.fromARGB(255, 0, 0, 0),
+      Color.fromARGB(164, 36, 35, 35),
+      Color.fromARGB(200, 0, 0, 0),
+    ],
+  );
+
+  static const LinearGradient textBoxHeaderLight = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    stops: [0.1, 0.4, 0.9],
+    colors: [
+      Color.fromARGB(255, 165, 165, 168),
+      Color.fromARGB(86, 233, 233, 233),
+      Color.fromARGB(255, 187, 187, 187),
+    ],
   );
 }
 

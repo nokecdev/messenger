@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:signalr_chat/Widgets/States/ThemeNotifier.dart';
 
 class ChatRoomHeader extends StatelessWidget implements PreferredSizeWidget {
   const ChatRoomHeader({super.key});
@@ -8,8 +10,9 @@ class ChatRoomHeader extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    ThemeNotifier themeNotifier = Provider.of<ThemeNotifier>(context);
     return AppBar(
-        backgroundColor: const Color(0xFF39B0D2),
+        backgroundColor: themeNotifier.getAppBarColor(),
         centerTitle: true,
         title: const Text('Chats'),
         leading: GestureDetector(
