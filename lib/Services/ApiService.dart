@@ -9,14 +9,10 @@ import 'package:signalr_chat/Models/UserDto.dart';
 class ApiService {
   final storage = new FlutterSecureStorage();
   final serverUrl = "http://10.0.2.2:5000/";
-
   Future<String?> loginUser(UserDto user) async {
-    var url = Uri.http('10.0.2.2:5000', '/api/users/Authenticate');
-    print("URL: " + url.toString());
-
     try {
       var token = await http.post(
-          Uri.parse(serverUrl + 'api/users/Authenticate'),
+          Uri.parse("${serverUrl}api/users/Authenticate"),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode(<String, String>{
             'email': user.email,
@@ -24,15 +20,17 @@ class ApiService {
           }));
       return token.body;
     } catch (ClientException) {
-      print("login failed");
+      print("login failed" + ClientException.toString());
     }
     return '';
   }
 
   Future<Map<Map<String, dynamic>, Map<String, dynamic>>> getAllChatRoom(
       int userId) async {
-    Response response =
-        await get(Uri.parse(serverUrl + "api/chat/chatRooms/${userId}"));
+    String searchKey = '';
+    Response response = await http
+        .get(Uri.parse("${serverUrl}api/mobile/chats/$userId/$searchKey"));
+    //await get(Uri.http(serverUrl, "api/chat/chatRooms/${userId}"));
     List userData = List.empty();
     userData = jsonDecode(response.body);
     print('data received: $userData');
@@ -65,8 +63,8 @@ class ApiService {
 
   Future<Map<Map<String, dynamic>, Map<String, dynamic>>?> search(
       int userId, String searchKey) async {
-    Response response = await get(Uri.parse(
-        "http://10.0.2.2:5000/api/chat/chatRooms/$userId/$searchKey"));
+    Response response = await get(
+        Uri.parse("${serverUrl}api/chat/chatRooms/$userId/$searchKey"));
     List userData = List.empty();
     if (response != null || response != '') {
       userData = jsonDecode(response.body);

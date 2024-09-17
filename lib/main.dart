@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:signalr_chat/Widgets/ChatRoomView.dart';
 import 'package:signalr_chat/Widgets/SearchView.dart';
-import 'package:signalr_chat/Widgets/StartView.dart';
 import 'package:signalr_chat/Widgets/States/ChatRoomsDrawer.dart';
 import 'package:signalr_chat/Widgets/States/GlobalTheme.dart';
 import 'package:signalr_chat/Widgets/States/LoadingState.dart';
