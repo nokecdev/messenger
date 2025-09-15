@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
-import 'package:signalr_chat/Services/ApiService.dart';
-import 'package:signalr_chat/Widgets/States/ChatRoomHeader.dart';
-import 'package:signalr_chat/Widgets/States/ChatRoomsDrawer.dart';
-import 'package:signalr_chat/Widgets/States/GlobalTheme.dart';
-import 'package:signalr_chat/Widgets/States/ThemeNotifier.dart';
+import 'package:signalr_chat/Services/api_service.dart';
+import 'package:signalr_chat/Widgets/States/chat_room_header.dart';
+import 'package:signalr_chat/Widgets/States/chat_rooms_drawer.dart';
+import 'package:signalr_chat/Widgets/States/theme_notifier.dart';
 
 class ChatRoomView extends StatefulWidget {
   const ChatRoomView({super.key});
@@ -41,21 +39,19 @@ class _ChatRoomViewState extends State<ChatRoomView> {
         body: Container(
           decoration: BoxDecoration(gradient: themeNotifier.getGradient()),
           child: Column(children: <Widget>[
-            Container(
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: TextField(
-                  autofocus: false,
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                      border: const OutlineInputBorder(),
-                      hintText: 'Search by name or message...',
-                      hintStyle: const TextStyle(color: Color(0xFFC9C7C7)),
-                      suffixIcon: IconButton(
-                          icon: const Icon(Icons.search),
-                          onPressed: () async => mappedData = (await _apiService
-                              .search(1491, _searchController.text))!)),
-                ),
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: TextField(
+                autofocus: false,
+                controller: _searchController,
+                decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
+                    hintText: 'Search by name or message...',
+                    hintStyle: const TextStyle(color: Color(0xFFC9C7C7)),
+                    suffixIcon: IconButton(
+                        icon: const Icon(Icons.search),
+                        onPressed: () async => mappedData = (await _apiService
+                            .search(1491, _searchController.text))!)),
               ),
             ),
             Expanded(

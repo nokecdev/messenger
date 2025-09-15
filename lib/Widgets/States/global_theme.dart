@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:signalr_chat/Storage/UserStorage.dart';
+import 'package:signalr_chat/Storage/user_storage.dart';
 
 class GlobalTheme with ChangeNotifier {
   final FlutterSecureStorage storage = const FlutterSecureStorage();
@@ -16,7 +16,6 @@ class GlobalTheme with ChangeNotifier {
 
   Future<void> _loadTheme() async {
     _theme = await storage.read(key: "theme") ?? "default";
-    print("theme is : " + theme);
     notifyListeners();
   }
 
@@ -81,9 +80,9 @@ class GlobalTheme with ChangeNotifier {
   }
 
   static final Color _defaultFocusColor =
-      const Color.fromARGB(255, 122, 86, 206).withOpacity(0.12);
-  static final Color _lightFocusColor = Colors.black.withOpacity(0.12);
-  static final Color _darkFocusColor = Colors.white.withOpacity(0.12);
+      const Color.fromARGB(255, 122, 86, 206).withValues(alpha: 0.12);
+  static final Color _lightFocusColor = Colors.black.withValues(alpha: 0.12);
+  static final Color _darkFocusColor = Colors.white.withValues(alpha: 0.12);
 
   static ThemeData defaultTheme =
       baseTheme(defaultBackgroundGradient, _defaultFocusColor);

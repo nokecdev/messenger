@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:signalr_chat/Widgets/ChatRoomView.dart';
-import 'package:signalr_chat/Widgets/SearchView.dart';
-import 'package:signalr_chat/Widgets/States/ChatRoomsDrawer.dart';
-import 'package:signalr_chat/Widgets/States/GlobalTheme.dart';
-import 'package:signalr_chat/Widgets/States/LoadingState.dart';
-import 'package:signalr_chat/Widgets/LoadingView.dart';
-import 'package:signalr_chat/Widgets/LoginView.dart';
-import 'package:signalr_chat/Widgets/MessageView.dart';
+import 'package:signalr_chat/Widgets/chat_room_view.dart';
+import 'package:signalr_chat/Widgets/search_view.dart';
+import 'package:signalr_chat/Widgets/States/global_theme.dart';
+import 'package:signalr_chat/Widgets/States/loading_state.dart';
+import 'package:signalr_chat/Widgets/loading_view.dart';
+import 'package:signalr_chat/Widgets/login_view.dart';
+import 'package:signalr_chat/Widgets/message_view.dart';
 import 'package:provider/provider.dart';
-import 'package:signalr_chat/Services/ApiService.dart';
-import 'package:signalr_chat/Widgets/States/ThemeNotifier.dart';
+import 'package:signalr_chat/Services/api_service.dart';
+import 'package:signalr_chat/Widgets/States/theme_notifier.dart';
+import 'package:signalr_chat/screens/login_screen.dart';
 
 void main() {
   runApp(const AppProviders());
@@ -38,8 +38,6 @@ class AppProviders extends StatelessWidget {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     ThemeNotifier themeNotifier = Provider.of<ThemeNotifier>(context);
@@ -54,8 +52,8 @@ class MyApp extends StatelessWidget {
       initialRoute: '/login',
       routes: {
         '/loading': (context) => const LoadingView(),
-        '/login': (context) => const LoginView(),
-        '/chatrooms': (context) => ChatRoomView(),
+        '/login': (context) => LoginScreen(),
+        '/chatrooms': (context) => const ChatRoomView(),
         '/messages': (context) => const MessageView(),
         '/search': (context) => const SearchView()
       },

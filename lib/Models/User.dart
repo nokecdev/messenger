@@ -1,3 +1,4 @@
+// ignore_for_file: file_names
 class User {
   String email;
   String password;
@@ -13,9 +14,9 @@ class User {
 
   getUser() {
     return User(
-        email: this.email,
-        password: this.password,
-        token: this.token,
-        guid: this.guid);
+        email: email,
+        password: password,
+        token: token,
+        guid: guid);
   }
 }

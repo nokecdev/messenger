@@ -6,7 +6,7 @@ class MessageService {
   final String serverUrl = "ws://localhost:5000/Chat"; //"http://10.0.2.2:5000";
   late HubConnection hubConnection;
   // Creates the connection by using the HubConnectionBuilder.
-  void Build() async {
+  void build() async {
     hubConnection = HubConnectionBuilder().withUrl(serverUrl).build();
     await hubConnection.start();
   }
@@ -18,9 +18,9 @@ class MessageService {
   void watchIncomingMessage() {
     hubConnection.on('ReceiveMessage', (args) {
       // Handle incoming message here
-      int fromUserId = int.parse(args[0]);
-      int userId = int.parse(args[1]);
-      String message = args[2];
+      // int? fromUserId = int.tryParse(args[0]);
+      // int userId = int.parse(args[1]);
+      // String message = args[2];
     });
 
   }

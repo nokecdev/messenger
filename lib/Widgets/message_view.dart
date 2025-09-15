@@ -1,8 +1,7 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:signalr_chat/Models/ChatContent.dart';
-import 'package:signalr_chat/Widgets/States/ThemeNotifier.dart';
+import 'package:signalr_chat/Models/chat_content.dart';
+import 'package:signalr_chat/Widgets/States/theme_notifier.dart';
 
 class MessageView extends StatefulWidget {
   const MessageView({super.key});
@@ -27,9 +26,8 @@ class _MessageViewState extends State<MessageView> {
 
     var chatContents = key['chatContents'];
     var selectedIndex = 0;
-    MenuItem? selectedMenu;
+    MenuItem? selectedMenu = MenuItem.itemOne;
 
-    print("Received content: $chatContents");
     //print("Received info: $value");
 
     return Scaffold(
@@ -60,7 +58,7 @@ class _MessageViewState extends State<MessageView> {
                   (int index) => MenuItemButton(
                     onPressed: () =>
                         setState(() => selectedMenu = MenuItem.values[index]),
-                    child: Text('Item ' + selectedIndex.toString()),
+                    child: Text('Item${selectedIndex.toString()}'),
                   ),
                 ),
               ),
@@ -79,7 +77,7 @@ class _MessageViewState extends State<MessageView> {
                       content: Chatcontent.fromJson(chatContents[index]));
                 },
               )),
-              MyTextField()
+              const MyTextField()
             ],
           ),
         ));
@@ -92,7 +90,7 @@ class MessengerCard extends StatelessWidget {
 
   const MessengerCard({super.key, required this.avatar, required this.content});
 
-  bool MessageIsFromUser(id) {
+  bool messageIsFromUser(id) {
     return id == 1491; //TOdo: get userId from storage
   }
 
@@ -103,15 +101,15 @@ class MessengerCard extends StatelessWidget {
       elevation: 0,
       color: Colors.transparent,
       child: ListTile(
-        leading: !MessageIsFromUser(content.AuthorId)
+        leading: !messageIsFromUser(content.authorId)
             ? UserAvatar(userAvatar: avatar)
             : null,
-        trailing: MessageIsFromUser(content.AuthorId)
+        trailing: messageIsFromUser(content.authorId)
             ? UserAvatar(userAvatar: avatar)
             : null,
         title: Wrap(children: [
           Row(
-            mainAxisAlignment: MessageIsFromUser(content.AuthorId)
+            mainAxisAlignment: messageIsFromUser(content.authorId)
                 ? MainAxisAlignment.end
                 : MainAxisAlignment.start,
             children: [
@@ -137,7 +135,7 @@ class MessengerCard extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                       vertical: 10.0, horizontal: 7.0),
-                  child: Text(content.Message),
+                  child: Text(content.message),
                 ),
               ),
             ],
@@ -152,7 +150,7 @@ class MessengerCard extends StatelessWidget {
 class UserAvatar extends StatelessWidget {
   final String userAvatar;
 
-  const UserAvatar({required this.userAvatar});
+  const UserAvatar({super.key, required this.userAvatar});
 
   @override
   Widget build(BuildContext context) {
@@ -169,7 +167,7 @@ class UserAvatar extends StatelessWidget {
                   as ImageProvider,
           fit: BoxFit.contain,
         ),
-        borderRadius: BorderRadius.all(Radius.circular(50.0)),
+        borderRadius: const BorderRadius.all(Radius.circular(50.0)),
         border: Border.all(
           color: const Color(0xff7c94b6),
           width: 1.0,
@@ -192,7 +190,7 @@ class _MyTextFieldState extends State<MyTextField> {
     ThemeNotifier themeNotifier = Provider.of<ThemeNotifier>(context);
 
     return Container(
-        color: Color.fromARGB(255, 82, 73, 161),
+        color: const Color.fromARGB(255, 82, 73, 161),
         padding: const EdgeInsets.symmetric(vertical: 2.0),
         child: Column(
           mainAxisSize: MainAxisSize.max,
@@ -204,34 +202,34 @@ class _MyTextFieldState extends State<MyTextField> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
                   IconButton(
-                      padding: EdgeInsets.all(0.0),
+                      padding: const EdgeInsets.all(0.0),
                       iconSize: 20.0,
                       icon: const Icon(Icons.mic),
                       onPressed: () {
-                        print("microphone recording");
+                        throw UnimplementedError("Microphone recording not yet implemented");
                       },
                       color: themeNotifier.theme == "dark"
                           ? Colors.white
                           : Colors.black),
                   IconButton(
-                      padding: EdgeInsets.all(0.0),
+                      padding: const EdgeInsets.all(0.0),
                       iconSize: 20.0,
                       icon: const Icon(Icons.image),
                       onPressed: () {
-                        print("image sending");
+                        throw UnimplementedError("Image sending not yet implemented");
                       },
                       color: themeNotifier.theme == "dark"
                           ? Colors.white
                           : Colors.black),
                   IconButton(
-                    padding: EdgeInsets.all(10.0),
+                    padding: const EdgeInsets.all(10.0),
                     iconSize: 20.0,
                     icon: const Icon(Icons.emoji_emotions),
                     color: themeNotifier.theme == "dark"
                         ? Colors.white
                         : Colors.black,
                     onPressed: () {
-                      print("emoji sending");
+                      throw UnimplementedError("Emoji sending not yet implemented");
                     },
                   ),
                 ],

@@ -3,12 +3,15 @@ import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart';
 import 'package:http/http.dart' as http;
+import 'package:logging/logging.dart';
 
-import 'package:signalr_chat/Models/UserDto.dart';
+import 'package:signalr_chat/Models/user_dto.dart';
 
 class ApiService {
-  final storage = new FlutterSecureStorage();
+  static const storage = FlutterSecureStorage();
   final serverUrl = "http://10.0.2.2:5000/";
+  final log = Logger('ApiService');
+
   Future<String?> loginUser(UserDto user) async {
     try {
       var token = await http.post(
@@ -19,8 +22,8 @@ class ApiService {
             'password': user.password
           }));
       return token.body;
-    } catch (ClientException) {
-      print("login failed" + ClientException.toString());
+    } on ClientException {
+      log.severe("login failed.");
     }
     return '';
   }
@@ -33,7 +36,7 @@ class ApiService {
     //await get(Uri.http(serverUrl, "api/chat/chatRooms/${userId}"));
     List userData = List.empty();
     userData = jsonDecode(response.body);
-    print('data received: $userData');
+    log.info('data received: $userData');
 
     Map<Map<String, dynamic>, Map<String, dynamic>> mappedData = {};
 
@@ -66,9 +69,9 @@ class ApiService {
     Response response = await get(
         Uri.parse("${serverUrl}api/chat/chatRooms/$userId/$searchKey"));
     List userData = List.empty();
-    if (response != null || response != '') {
+    if (response.statusCode == 200) {
       userData = jsonDecode(response.body);
-      print('data received: $userData');
+      log.info('data received: $userData');
 
       Map<Map<String, dynamic>, Map<String, dynamic>> mappedData = {};
 

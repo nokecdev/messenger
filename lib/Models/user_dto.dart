@@ -1,4 +1,4 @@
-import 'package:signalr_chat/Models/User.dart';
+import 'package:signalr_chat/Models/user.dart';
 
 class UserDto extends User {
   UserDto({required super.email, required super.password});

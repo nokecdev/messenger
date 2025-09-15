@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
-import 'package:signalr_chat/Models/UserDto.dart';
-import 'package:signalr_chat/Services/ApiService.dart';
+import 'package:signalr_chat/Models/user_dto.dart';
+import 'package:signalr_chat/Services/api_service.dart';
 import 'dart:convert';
-import 'package:signalr_chat/Storage/UserStorage.dart';
-import 'package:signalr_chat/Widgets/States/LoadingState.dart';
+import 'package:signalr_chat/Storage/user_storage.dart';
+import 'package:signalr_chat/Widgets/States/loading_state.dart';
 
-var loadingState;
+var loadingState = ChangeNotifier();
 
 class LoadingView extends StatefulWidget {
   const LoadingView({super.key});
@@ -45,7 +45,6 @@ class _LoadingViewState extends State<LoadingView> {
       userStorage.saveUser(email, user["token"]);
       getChatRooms();
     } else {
-      print("login failed, server not responded" + jsonString);
       if (mounted) {
         Navigator.pushReplacementNamed(context, '/login');
       }

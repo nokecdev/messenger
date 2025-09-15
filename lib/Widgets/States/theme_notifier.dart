@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:signalr_chat/Widgets/States/GlobalTheme.dart';
+import 'package:signalr_chat/Widgets/States/global_theme.dart';
 
 class ThemeNotifier extends ChangeNotifier {
   final GlobalTheme globalTheme;
