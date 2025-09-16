@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:signalr_chat/Widgets/chat_room_view.dart';
+import 'package:signalr_chat/screens/chat_room.dart';
 import 'package:signalr_chat/Widgets/search_view.dart';
 import 'package:signalr_chat/Widgets/States/global_theme.dart';
 import 'package:signalr_chat/Widgets/States/loading_state.dart';
-import 'package:signalr_chat/Widgets/loading_view.dart';
+import 'package:signalr_chat/screens/loader.dart';
 import 'package:signalr_chat/Widgets/login_view.dart';
 import 'package:signalr_chat/Widgets/message_view.dart';
 import 'package:provider/provider.dart';
@@ -52,8 +52,8 @@ class MyApp extends StatelessWidget {
       initialRoute: '/login',
       routes: {
         '/loading': (context) => const LoadingView(),
-        '/login': (context) => LoginScreen(),
-        '/chatrooms': (context) => const ChatRoomView(),
+        '/login': (context) => const LoginScreen(),
+        '/rooms': (context) => const ChatRoomView(),
         '/messages': (context) => const MessageView(),
         '/search': (context) => const SearchView()
       },

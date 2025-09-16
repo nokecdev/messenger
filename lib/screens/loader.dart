@@ -22,44 +22,52 @@ class _LoadingViewState extends State<LoadingView> {
   final apiService = ApiService();
   final userStorage = UserStorage();
 
+  void goToLogin( {String message = "Something went wrong"} ) {
+    Navigator.pushReplacementNamed(context, '/login');
+    showSnackbar(
+      context, 
+      message: message, 
+      duration: const Duration(seconds: 10), 
+      backgroundColor: Colors.redAccent
+    );
+  }
+
+  
   void loginUser(String email, String password) async {
     Response? response = await apiService.loginUser(email, password);
     if (!mounted) return;
 
     if (response != null) {
       if (response.statusCode == 200) {
-        //Sikeres bejelentkezés
-        final userDetails = jsonDecode(response.body) as Map<String, dynamic>;
-        userStorage.saveUser(email, userDetails["token"]);
-        Navigator.pushReplacementNamed(context, '/rooms');
+        final jsonResp = jsonDecode(response.body) as Map<String, dynamic>;
+        final userDetails = jsonResp["userDetails"];
+        final isActivated = userDetails["isActivated"] as bool;
+        final isBanned = userDetails["isBanned"] as bool;
+        final isRestricted = userDetails["isRestricted"] as bool;
+        
+        // User details received
+        if (!isBanned && !isRestricted && isActivated) {
+          //Sikeres bejelentkezés
+          userStorage.saveUser(email, jsonResp["token"]);
+          Navigator.pushReplacementNamed(context, '/rooms');
+        }
+        else {
+          //Banned or moderated account
+          goToLogin(message: "Your account is permitted");
+        }
       }
+      // User not found
       else if (response.statusCode == 404) {
-          Navigator.pushReplacementNamed(context, '/login');
-          showSnackbar(
-            context, 
-            message: "Invalid email or password", 
-            duration: const Duration(seconds: 10), 
-            backgroundColor: Colors.redAccent
-          );
+        goToLogin(message: "Email or password is invalid");
       }
+      // Account not activated
       else if (response.statusCode == 400 && response.body == "Not activated")
       {
-          Navigator.pushReplacementNamed(context, '/login');
-          showSnackbar(
-            context, 
-            message: "Account not activated.", 
-            duration: const Duration(seconds: 10), 
-            backgroundColor: Colors.redAccent
-          );
+        goToLogin(message: "Account not activated.");
       }
+      // Other error handling
       else {
-        Navigator.pushReplacementNamed(context, '/login');
-          showSnackbar(
-            context, 
-            message: "Login failed.", 
-            duration: const Duration(seconds: 10), 
-            backgroundColor: Colors.redAccent
-          );
+        goToLogin(message: "Login failed.");
       }
     }
   }
@@ -73,7 +81,6 @@ class _LoadingViewState extends State<LoadingView> {
       case 'login':
         loginUser(data['email'], data['password']);
     }
-    //printUserInfo();
 
     return const Scaffold(
         backgroundColor: Color.fromARGB(0, 206, 210, 212),
