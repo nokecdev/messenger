@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:http/http.dart';
 import 'package:provider/provider.dart';
-import 'package:signalr_chat/Models/user_dto.dart';
 import 'package:signalr_chat/Services/api_service.dart';
 import 'dart:convert';
 import 'package:signalr_chat/Storage/user_storage.dart';
 import 'package:signalr_chat/Widgets/States/loading_state.dart';
+import 'package:signalr_chat/Widgets/snackbar.dart';
 
 var loadingState = ChangeNotifier();
 
@@ -21,32 +22,44 @@ class _LoadingViewState extends State<LoadingView> {
   final apiService = ApiService();
   final userStorage = UserStorage();
 
-  void getChatRooms() async {
-    var response = await apiService.getAllChatRoom(1491);
-    //print(response);
-    if (mounted) {
-      await Navigator.pushReplacementNamed(context, '/chatrooms',
-          arguments: response);
-    }
-  }
-
   void loginUser(String email, String password) async {
-    UserDto userInstance = UserDto(email: email, password: password);
-    var jsonString = await apiService.loginUser(userInstance);
-    if (jsonString == null) {
-      if (mounted) {
-        Navigator.pop(context);
-      }
-    }
-    if (jsonString!.isNotEmpty) {
-      //print(jsonString);
-      final user = jsonDecode(jsonString) as Map<String, dynamic>;
+    Response? response = await apiService.loginUser(email, password);
+    if (!mounted) return;
 
-      userStorage.saveUser(email, user["token"]);
-      getChatRooms();
-    } else {
-      if (mounted) {
+    if (response != null) {
+      if (response.statusCode == 200) {
+        //Sikeres bejelentkezés
+        final userDetails = jsonDecode(response.body) as Map<String, dynamic>;
+        userStorage.saveUser(email, userDetails["token"]);
+        Navigator.pushReplacementNamed(context, '/rooms');
+      }
+      else if (response.statusCode == 404) {
+          Navigator.pushReplacementNamed(context, '/login');
+          showSnackbar(
+            context, 
+            message: "Invalid email or password", 
+            duration: const Duration(seconds: 10), 
+            backgroundColor: Colors.redAccent
+          );
+      }
+      else if (response.statusCode == 400 && response.body == "Not activated")
+      {
+          Navigator.pushReplacementNamed(context, '/login');
+          showSnackbar(
+            context, 
+            message: "Account not activated.", 
+            duration: const Duration(seconds: 10), 
+            backgroundColor: Colors.redAccent
+          );
+      }
+      else {
         Navigator.pushReplacementNamed(context, '/login');
+          showSnackbar(
+            context, 
+            message: "Login failed.", 
+            duration: const Duration(seconds: 10), 
+            backgroundColor: Colors.redAccent
+          );
       }
     }
   }
@@ -63,7 +76,7 @@ class _LoadingViewState extends State<LoadingView> {
     //printUserInfo();
 
     return const Scaffold(
-        backgroundColor: Color.fromARGB(117, 157, 199, 233),
+        backgroundColor: Color.fromARGB(0, 206, 210, 212),
         body: SpinKitWave(
           color: Colors.blue,
           size: 50.0,
