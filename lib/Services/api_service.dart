@@ -8,24 +8,24 @@ import 'package:logging/logging.dart';
 import 'package:signalr_chat/Models/user_dto.dart';
 
 class ApiService {
-  static const storage = FlutterSecureStorage();
-  final serverUrl = "http://10.0.2.2:5000/";
+  final storage = FlutterSecureStorage();
+  final serverUrl = "http://10.0.2.2:5002/";
   final log = Logger('ApiService');
 
-  Future<String?> loginUser(UserDto user) async {
+  Future<Response?> loginUser(email, password) async {
     try {
       var token = await http.post(
-          Uri.parse("${serverUrl}api/users/Authenticate"),
+          Uri.parse("${serverUrl}api/auth/authenticate"),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode(<String, String>{
-            'email': user.email,
-            'password': user.password
+            'email': email,
+            'password': password
           }));
-      return token.body;
+      return token;
     } on ClientException {
       log.severe("login failed.");
     }
-    return '';
+    return null;
   }
 
   Future<Map<Map<String, dynamic>, Map<String, dynamic>>> getAllChatRoom(
