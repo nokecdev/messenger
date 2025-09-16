@@ -22,7 +22,7 @@ class _LoadingViewState extends State<LoadingView> {
   final apiService = ApiService();
   final userStorage = UserStorage();
 
-  void goToLogin( {String message = "Something went wrong"} ) {
+  void _goToLogin( {String message = "Something went wrong"} ) {
     Navigator.pushReplacementNamed(context, '/login');
     showSnackbar(
       context, 
@@ -48,28 +48,34 @@ class _LoadingViewState extends State<LoadingView> {
         // User details received
         if (!isBanned && !isRestricted && isActivated) {
           //Sikeres bejelentkezés
-          userStorage.saveUser(email, jsonResp["token"]);
+          userStorage.saveUser(userDetails, jsonResp["token"]);
           Navigator.pushReplacementNamed(context, '/rooms');
         }
         else {
           //Banned or moderated account
-          goToLogin(message: "Your account is permitted");
+          _goToLogin(message: "Your account is permitted");
         }
       }
       // User not found
       else if (response.statusCode == 404) {
-        goToLogin(message: "Email or password is invalid");
+        _goToLogin(message: "Email or password is invalid");
       }
       // Account not activated
       else if (response.statusCode == 400 && response.body == "Not activated")
       {
-        goToLogin(message: "Account not activated.");
+        _goToLogin(message: "Account not activated.");
       }
       // Other error handling
       else {
-        goToLogin(message: "Login failed.");
+        _goToLogin(message: "Login failed.");
       }
     }
+  }
+
+  void loadChatRooms() async {
+    print("CSetszobák betöltése..");
+    Response? response = await apiService.getAllChatRoom();
+    print(response);
   }
 
   @override
@@ -80,6 +86,8 @@ class _LoadingViewState extends State<LoadingView> {
     switch (data['endpoint']) {
       case 'login':
         loginUser(data['email'], data['password']);
+      case 'rooms':
+        loadChatRooms();
     }
 
     return const Scaffold(

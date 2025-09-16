@@ -4,18 +4,20 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart';
 import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
-
-import 'package:signalr_chat/Models/user_dto.dart';
+import 'package:signalr_chat/Models/get_chat_rooms_dto.dart';
+import 'package:signalr_chat/Storage/user_storage.dart';
 
 class ApiService {
-  final storage = FlutterSecureStorage();
-  final serverUrl = "http://10.0.2.2:5002/";
+  final storage = const FlutterSecureStorage();
+  final userEndpoint = "http://10.0.2.2:5002";
+  final chatEndpoint = "http://10.0.2.2:5000";
   final log = Logger('ApiService');
+  final userStorage = UserStorage();
 
   Future<Response?> loginUser(email, password) async {
     try {
       var token = await http.post(
-          Uri.parse("${serverUrl}api/auth/authenticate"),
+          Uri.parse("$userEndpoint/api/auth/authenticate"),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode(<String, String>{
             'email': email,
@@ -28,62 +30,23 @@ class ApiService {
     return null;
   }
 
-  Future<Map<Map<String, dynamic>, Map<String, dynamic>>> getAllChatRoom(
-      int userId) async {
-    String searchKey = '';
-    Response response = await http
-        .get(Uri.parse("${serverUrl}api/mobile/chats/$userId/$searchKey"));
-    //await get(Uri.http(serverUrl, "api/chat/chatRooms/${userId}"));
-    List userData = List.empty();
-    userData = jsonDecode(response.body);
-    log.info('data received: $userData');
+  Future<Response?> getAllChatRoom() async {
+    final url = Uri.parse("$chatEndpoint/api/chat/rooms");
+    final dto = GetChatRoomsDto(
+      roomOffset: 15, 
+      messagesOffset: 20, 
+      currentPage: 1
+    );
+    String token = await userStorage.getToken();
+    Response? response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token'
+      },
+      body: jsonEncode(dto.toJson())
+    );
 
-    Map<Map<String, dynamic>, Map<String, dynamic>> mappedData = {};
-
-    for (dynamic jsonItem in userData) {
-      Map<String, dynamic> key = jsonItem['key'];
-      Map<String, dynamic> value = jsonItem['value'];
-
-      mappedData[key] = value;
-    }
-    return mappedData;
-
-    // Future<dynamic> fetchData(
-    //     String endpoint, Map<String, dynamic> params) async {
-    //   // Perform the actual HTTP request here
-
-    //   String? token = await storage.read(key: 'user_token');
-    //   if (token != null) {
-    //     Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
-
-    //     print("User email: ${decodedToken['email']}");
-    //     print("User ID: ${decodedToken['userId']}");
-    //   } else {
-    //     print("No token found");
-    //   }
-    // }
-  }
-
-  Future<Map<Map<String, dynamic>, Map<String, dynamic>>?> search(
-      int userId, String searchKey) async {
-    Response response = await get(
-        Uri.parse("${serverUrl}api/chat/chatRooms/$userId/$searchKey"));
-    List userData = List.empty();
-    if (response.statusCode == 200) {
-      userData = jsonDecode(response.body);
-      log.info('data received: $userData');
-
-      Map<Map<String, dynamic>, Map<String, dynamic>> mappedData = {};
-
-      for (dynamic jsonItem in userData) {
-        Map<String, dynamic> key = jsonItem['key'];
-        Map<String, dynamic> value = jsonItem['value'];
-
-        mappedData[key] = value;
-      }
-      return mappedData;
-    } else {
-      return null;
-    }
+    return response;
   }
 }

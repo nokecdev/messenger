@@ -4,7 +4,6 @@ import 'package:signalr_chat/Widgets/search_view.dart';
 import 'package:signalr_chat/Widgets/States/global_theme.dart';
 import 'package:signalr_chat/Widgets/States/loading_state.dart';
 import 'package:signalr_chat/screens/loader.dart';
-import 'package:signalr_chat/Widgets/login_view.dart';
 import 'package:signalr_chat/Widgets/message_view.dart';
 import 'package:provider/provider.dart';
 import 'package:signalr_chat/Services/api_service.dart';

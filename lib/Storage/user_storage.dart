@@ -5,16 +5,13 @@ class UserStorage {
   static const storage = FlutterSecureStorage();
   final log = Logger('UserStorage');
 
-  getStoredUser(String email) async {
-    //Stores user guid id
-    String? value = await storage.read(key: email);
-    return value;
+  getToken() async {
+    return await storage.read(key: "token");
   }
-
-  saveUser(String email, String token) async {
-    await storage
-        .write(key: email, value: token)
-        .then((value) => log.info("user stored: "));
+  
+  saveUser(dynamic details, String token) async {
+    await storage.write(key: "details", value: details.toString());
+    await storage.write(key: "token", value: token);
   }
 
   setTheme(String mode) {
