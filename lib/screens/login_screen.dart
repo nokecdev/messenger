@@ -3,14 +3,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:signalr_chat/utils/constants.dart';
 import 'package:signalr_chat/Widgets/pressable_button.dart';
+import 'package:signalr_chat/Services/api_service.dart';
+import 'package:signalr_chat/Widgets/snackbar.dart';
+import 'package:signalr_chat/validations/validations.dart';
 
 class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  bool _rememberMe = false;
+  bool _rememberMe = false;  
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final apiService = ApiService();
+
+
   _buildEmailTF() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -23,16 +34,23 @@ class _LoginScreenState extends State<LoginScreen> {
         Container(
           alignment: Alignment.centerLeft,
           decoration: kBoxDecorationStyle,
+          padding: const EdgeInsets.symmetric(horizontal: 4.0),
           height: 60.0,
-          child: const TextField(
+          child: TextFormField(
+            controller: _emailController,
             keyboardType: TextInputType.emailAddress,
-            style: TextStyle(color: Colors.white),
-            decoration: InputDecoration(
+            validator: (value) => validateEmail(value),
+            style: const TextStyle(color: Colors.white),
+            decoration: const InputDecoration(
               border: InputBorder.none,
               contentPadding: EdgeInsets.only(top: 14.0),
               prefixIcon: Icon(
                 Icons.email, 
                 color: Colors.white,
+              ),
+              errorStyle: TextStyle(
+                fontSize: 12,
+                color: Colors.red,
               ),
               hintText: "Enter Your Email",
               hintStyle: kHintTextStyle
@@ -54,22 +72,29 @@ class _LoginScreenState extends State<LoginScreen> {
         Container(
           alignment: Alignment.centerLeft,
           decoration: kBoxDecorationStyle,
+          padding: const EdgeInsets.symmetric(horizontal: 4.0),
           height: 60.0,
-          child: const TextField(
+          child: TextFormField(
+            controller: _passwordController,
             obscureText: true,
             keyboardType: TextInputType.text,
-            style: TextStyle(
+            validator: (value) => validatePassword(value),
+            style: const TextStyle(
               color: Colors.white, 
               fontFamily: "OpenSans"
             ),
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               border: InputBorder.none,
               contentPadding: EdgeInsets.only(top: 14.0),
               prefixIcon: Icon(
                 Icons.lock, 
                 color: Colors.white,
               ),
-              hintText: "Enter Your Email",
+              errorStyle: TextStyle(
+                fontSize: 12,
+                color: Colors.red,
+              ),
+              hintText: "Enter Your Password",
               hintStyle: kHintTextStyle
             ),
           ),
@@ -80,8 +105,8 @@ class _LoginScreenState extends State<LoginScreen> {
     Widget _buildForgotPasswordBtn() {
       return Container(
         alignment: Alignment.centerRight,
-          child: TextButton(
-            onPressed: () => print("Forgot Password Button pressed"),
+        child: TextButton(
+          onPressed: () => print("Forgot Password Button pressed"),
             child: const Text("Forgot Password?",
             style: kLabelStyle
           )
@@ -108,37 +133,6 @@ class _LoginScreenState extends State<LoginScreen> {
             style: kLabelStyle,
           )
         ],
-      );
-    }
-
-    Widget _buildLoginBtn() {
-      return Container(
-        padding: const EdgeInsets.symmetric(vertical: 25.0),
-        child: SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () => print("Login Button Pressed"),
-            style: ElevatedButton.styleFrom(
-              elevation: 5.0,
-              padding: const EdgeInsets.all(15.0),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30.0)
-              ),
-              
-              backgroundColor: Colors.white,
-            ),
-            child: const Text(
-              "LOGIN",
-              style: TextStyle(
-                color: Color(0xFF527DAA),
-                letterSpacing: 1.5,
-                fontSize: 18.0,
-                fontWeight: FontWeight.bold,
-                fontFamily: "OpenSans",
-              ),
-            ),
-          ),
-        ), 
       );
     }
 
@@ -221,6 +215,27 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     }
 
+  bool _validateForm() {
+    if (_formKey.currentState != null) {
+      {
+        return _formKey.currentState!.validate();
+      }
+    }
+    return false;
+  }
+
+  void _onLoginPressed() {
+    if (_validateForm()) {
+      Navigator.pushReplacementNamed(
+        context, '/loading', 
+        arguments: {
+          'endpoint': 'login',
+          'email': _emailController.text,
+          'password': _passwordController.text
+        }
+      );
+    }
+  }
 
     @override
     Widget build(BuildContext context) {
@@ -256,41 +271,44 @@ class _LoginScreenState extends State<LoginScreen> {
                       horizontal: 40.0,
                       vertical: 120.0
                     ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          "Sign In",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontFamily: "OpenSans",
-                            fontSize: 30.0,
-                            fontWeight: FontWeight.bold
-                          ),
-                        ),
-                        const SizedBox(height: 30.0),
-                        _buildEmailTF(),
-                        const SizedBox(height: 60.0),
-                        _buildPasswordTF(),
-                        _buildForgotPasswordBtn(),
-                        _buildRememberMeCheckBox(),
-                        PressableButton(
-                          onPressed: () => print("Login Pressed"),
-                          child: const Text(
-                            "LOGIN",
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            "Sign In",
                             style: TextStyle(
                               color: Colors.white,
-                              letterSpacing: 1.5,
-                              fontSize: 18.0,
-                              fontWeight: FontWeight.bold,
                               fontFamily: "OpenSans",
+                              fontSize: 30.0,
+                              fontWeight: FontWeight.bold
                             ),
                           ),
-                        ),
-                        _buildSignInWithText(),
-                        _buildSocialBtnRow(),
-                        _buildSignUpBtn()
-                      ],
+                          const SizedBox(height: 30.0),
+                          _buildEmailTF(),
+                          const SizedBox(height: 60.0),
+                          _buildPasswordTF(),
+                          _buildForgotPasswordBtn(),
+                          _buildRememberMeCheckBox(),
+                          PressableButton(
+                            onPressed: _onLoginPressed,
+                            child: const Text(
+                              "LOGIN",
+                              style: TextStyle(
+                                color: Colors.white,
+                                letterSpacing: 1.5,
+                                fontSize: 18.0,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: "OpenSans",
+                              ),
+                            ),
+                          ),
+                          _buildSignInWithText(),
+                          _buildSocialBtnRow(),
+                          _buildSignUpBtn()
+                        ],
+                      ),
                     )
                   ),
                 )
