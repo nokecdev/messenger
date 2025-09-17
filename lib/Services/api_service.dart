@@ -30,12 +30,12 @@ class ApiService {
     return null;
   }
 
-  Future<Response?> getAllChatRoom() async {
+  Future<Response?> getAllChatRoom({int currentPage = 1, int roomOffset = 15, int messagesOffset = 20}) async {
     final url = Uri.parse("$chatEndpoint/api/chat/rooms");
     final dto = GetChatRoomsDto(
-      roomOffset: 15, 
-      messagesOffset: 20, 
-      currentPage: 1
+      roomOffset: roomOffset, 
+      messagesOffset: messagesOffset, 
+      currentPage: currentPage
     );
     String token = await userStorage.getToken();
     Response? response = await http.post(
