@@ -10,7 +10,7 @@ import 'package:signalr_chat/Storage/user_storage.dart';
 class ApiService {
   final storage = const FlutterSecureStorage();
   final userEndpoint = "http://10.0.2.2:5002";
-  final chatEndpoint = "http://10.0.2.2:5000";
+  final chatEndpoint = "http://10.0.2.2:5050";
   final log = Logger('ApiService');
   final userStorage = UserStorage();
 

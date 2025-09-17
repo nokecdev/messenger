@@ -34,12 +34,15 @@ class ChatRoomHeader extends StatelessWidget implements PreferredSizeWidget {
           //     );
           //   },
           // ),
-          IconButton(
-            icon: const Icon(Icons.add),
-            tooltip: 'Go to the next page',
+          ElevatedButton(
+            style: ElevatedButton.styleFrom( // styling the button
+              shape: const CircleBorder(),
+              padding: const EdgeInsets.all(15),
+            ),
             onPressed: () {
               Navigator.pushNamed(context, '/search');
             },
+            child: const Icon(Icons.add),
           ),
         ]);
   }

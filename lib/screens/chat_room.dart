@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import 'package:signalr_chat/Widgets/States/chat_room_header.dart';
 import 'package:signalr_chat/Widgets/States/chat_rooms_drawer.dart';
 import 'package:signalr_chat/Widgets/States/theme_notifier.dart';
 import 'package:signalr_chat/Widgets/snackbar.dart';
+import 'package:signalr_chat/utils/methods.dart';
 
 class ChatRoomView extends StatefulWidget {
   const ChatRoomView({super.key});
@@ -18,11 +20,7 @@ class ChatRoomView extends StatefulWidget {
 }
 
 class _ChatRoomViewState extends State<ChatRoomView> {
-  
   final TextEditingController _searchController = TextEditingController();
-  final ApiService _apiService = ApiService();
-  final ChatRoomsResponse? chatRooms = null;
-
 
   @override
   void dispose() {
@@ -37,7 +35,7 @@ class _ChatRoomViewState extends State<ChatRoomView> {
   }
 
   
-  Future<void> initRooms() async {
+  Future<ChatRoomsResponse?> initRooms() async {
     try {
 
       final apiService = context.read<ApiService>();
@@ -45,38 +43,33 @@ class _ChatRoomViewState extends State<ChatRoomView> {
 
       final token = await userStorage.getToken();
       if (token == null) {
-        if (!mounted) return;
+        if (!mounted) return null;
         Navigator.pushReplacementNamed(context, '/login');
-        return;
+        return null;
       }
 
-      final chatRooms = await apiService.getAllChatRoom();
-      print(chatRooms?.statusCode);
-      print("Received response from service");
-      print(chatRooms?.body);
+      final resp = await apiService.getAllChatRoom();
+      if (!mounted) return null;
 
-      if (!mounted) return;
-
-      if (chatRooms != null) {
-        if (chatRooms.statusCode == 200) {
-          print("response: ${chatRooms.body}");
-
-          final Map<String, dynamic> jsonMap = jsonDecode(chatRooms.body);
+      if (resp != null) {
+        if (resp.statusCode == 200) {
+          final Map<String, dynamic> jsonMap = jsonDecode(resp.body);
           final response = ChatRoomsResponse.fromJson(jsonMap);
-
-          print("Összes szoba: ${response.chatRooms.length}");
-          print("Első szoba ID: ${response.chatRooms.first.chatRoomId}");
+          print(resp.body);
+          return response;
+        } else if (resp.statusCode == 404) {
+          //TODO: Display no chatrooms found message.
         }
-       //Navigator.pushReplacementNamed(context, '/rooms');
       } else {
         showSnackbar(context, message: "Nem sikerült betölteni a szobákat");
         Navigator.pushReplacementNamed(context, '/login');
       }
     } catch (e) {
-      if (!mounted) return;
+      if (!mounted) return null;
       showSnackbar(context, message: "Hiba történt: $e");
       Navigator.pushReplacementNamed(context, '/login');
     }
+    return null;
   }
 
 
@@ -85,59 +78,81 @@ class _ChatRoomViewState extends State<ChatRoomView> {
     ThemeNotifier themeNotifier = Provider.of<ThemeNotifier>(context);
 
     return Scaffold(
-        drawer: const ChatRoomsDrawer(),
-        appBar: const ChatRoomHeader(),
-        body: Container(
-          decoration: BoxDecoration(gradient: themeNotifier.getGradient()),
-          child: Column(children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: TextField(
-                autofocus: false,
-                controller: _searchController,
-                decoration: InputDecoration(
-                    border: const OutlineInputBorder(),
-                    hintText: 'Search by name or message...',
-                    hintStyle: const TextStyle(color: Color(0xFFC9C7C7)),
-                    suffixIcon: IconButton(
-                        icon: const Icon(Icons.search),
-                        onPressed: () => print("search..."))),
-              ),
-            ),
-            // Expanded(
-            //     child: ListView.builder(
-            //   itemCount: mappedData.keys.length,
-            //   itemBuilder: (context, index) {
-            //     Map<String, dynamic> key = mappedData.keys.elementAt(index);
-            //     Map<String, dynamic> value = mappedData[key]!;
+      drawer: const ChatRoomsDrawer(),
+      appBar: const ChatRoomHeader(),
+      body: FutureBuilder<ChatRoomsResponse?>(
+        future: initRooms(),
+        builder: (context, asyncSnapshot) {
+          final rooms = asyncSnapshot.data;
+          return Container(
+            decoration: BoxDecoration(gradient: themeNotifier.getGradient()),
+            child: Column(children: <Widget>[
+              // Padding(
+              //   padding: const EdgeInsets.all(12.0),
+              //   child: TextField(
+              //     autofocus: false,
+              //     controller: _searchController,
+              //     decoration: InputDecoration(
+              //         border: const OutlineInputBorder(),
+              //         hintText: 'Search by name or message...',
+              //         hintStyle: const TextStyle(color: Color(0xFFC9C7C7)),
+              //         suffixIcon: IconButton(
+              //             icon: const Icon(Icons.search),
+              //             onPressed: () => print("search..."))),
+              //   ),
+              // ),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: rooms?.chatRooms.length,
+                  itemBuilder: (context, index) {
+                  var chatPartner = rooms?.chatRooms[index].chatPartner;
+                  var userAvatar = chatPartner?.avatar ?? '';
+                  var title = "${chatPartner?.firstName} ${chatPartner?.lastName}";
+                  var lastMessage = rooms?.chatRooms[index].lastMessage ?? "";
+                  var endedTime =  rooms?.chatRooms[index].endedDateTime.toString() ?? DateTime.now().toString();
+                  final dateTime = DateTime.parse(endedTime);
+                  final formattedTime = formatDate(dateTime);
+                  var chatRoomId = rooms?.chatRooms[index].chatRoomId;
 
-            //     var userAvatar = value['avatar'].toString();
-            //     var chatContents = key['chatContents'];
-
-            //     return Card(
-            //         color: Colors.transparent,
-            //         child: ListTile(
-            //           onTap: () async {
-            //             await Navigator.pushNamed(context, '/messages',
-            //                 arguments: mappedData);
-            //           },
-            //           leading: CircleAvatar(
-            //             backgroundImage: userAvatar.isNotEmpty
-            //                 ? NetworkImage(
-            //                     "https://storage.googleapis.com/socialstream/$userAvatar")
-            //                 : const AssetImage('assets/blank_profile_pic.png')
-            //                     as ImageProvider,
-            //           ),
-            //           title: Text("${chatContents[0]['message']}"),
-            //           subtitle: Text("${chatContents[0]['sentDate']}"),
-            //           trailing: const Icon(
-            //             Icons.circle_rounded,
-            //             color: Colors.green,
-            //           ),
-            //         ));
-            //   },
-            // ))
-          ]),
-        ));
+                  return Card(
+                    color: Colors.transparent,
+                    child: ListTile(
+                      onTap: () async {
+                          await Navigator.pushNamed(context, '/messages', arguments: chatRoomId);
+                      },
+                      leading: const CircleAvatar(
+                        backgroundImage: AssetImage("assets/blank_profile_pic.png")
+                        // backgroundImage:  userAvatar.isNotEmpty ? 
+                        //                   AssetImage("assets/blank_profile_pic.png") :
+                        //                   NetworkImage(userAvatar.toString()) as ImageProvider
+                      ),
+                      title: Text(title),
+                      subtitle: Text(lastMessage),
+                      trailing: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          const Icon(
+                            Icons.circle_rounded,
+                            color: Colors.green,
+                            size: 10,                            
+                          ),
+                          const SizedBox(height: 12), // kis távolság
+                          Text(
+                            formattedTime,
+                            style: const TextStyle(fontSize: 12),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    )
+                  );
+                },
+              ))
+            ]),
+          );
+        }
+      )
+    );
   }
 }

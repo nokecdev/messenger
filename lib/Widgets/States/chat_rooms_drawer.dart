@@ -86,7 +86,9 @@ class _ChatRoomsDrawerState extends State<ChatRoomsDrawer> {
           ListTile(
               title: ElevatedButton(
                   onPressed: () => themeNotifier.setTheme(),
-                  child: const Text("Switch theme")))
+                  child: const Text("Switch theme")
+              )
+          )
         ]),
       ),
     );
