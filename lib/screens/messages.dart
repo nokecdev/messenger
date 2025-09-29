@@ -1,7 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:signalr_chat/Models/chat_content.dart';
+import 'package:signalr_chat/Models/chat_partner_dto.dart';
+import 'package:signalr_chat/Services/api_service.dart';
+import 'package:signalr_chat/Storage/user_storage.dart';
 import 'package:signalr_chat/Widgets/States/theme_notifier.dart';
+import 'package:signalr_chat/Widgets/gradient_scaffold.dart';
 
 class MessageView extends StatefulWidget {
   const MessageView({super.key});
@@ -13,68 +19,194 @@ class MessageView extends StatefulWidget {
 enum MenuItem { itemOne, itemTwo, itemThree }
 
 class _MessageViewState extends State<MessageView> {
-  Map<Map<String, dynamic>, Map<String, dynamic>> data = {};
+  List<Chatcontent> messages = [];
+  var chatPartner = ChatPartnerDto(avatar: '', firstName: '', lastName: '', chatRoomId: '');
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    
+    //Mivel még az initben nem elérhető az arg, lebuildeljük a kódot majd utólag kinyerjük a csetszoba Id-ját.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final args = ModalRoute.of(context)!.settings.arguments as ChatPartnerDto;
+      setState(() {
+        chatPartner = args; //ChatPartnerDto.fromJson(args);      
+      });
+      print('received chatPartner:');
+      initMessages();
+    });
+  }
+
+  
+  Future<void> initMessages() async {
+    final userStorage = UserStorage();
+    final apiService = ApiService();
+
+    try {
+      final token = await userStorage.getToken();
+
+      if (token == null) {
+        if (!mounted) return;
+        Navigator.pushReplacementNamed(context, '/login');
+        return;
+      }
+      print("Room id: ${chatPartner.chatRoomId}");
+      var resp = await apiService.getChatContents(chatPartner.chatRoomId);
+      if (!mounted) return;
+
+      print(resp?.body);
+      if (resp != null) {
+
+        if (resp.statusCode == 200) {
+          final List<dynamic> jsonList = jsonDecode(resp.body);
+          setState(() => 
+            messages = jsonList.map((e) => Chatcontent.fromJson(e)).toList()
+          );
+        }
+      }
+      else {
+        //Failed to request from server
+      }
+    }
+    catch (e) {
+      print("hiba.");
+      print(e);
+    }
+  }
+
+  String _getUsername(ChatPartnerDto chatPartner) {
+    return "${chatPartner.firstName} ${chatPartner.middleName} ${chatPartner.lastName}";
+  }
+
 
   @override
   Widget build(BuildContext context) {
-    data = ModalRoute.of(context)!.settings.arguments
-        as Map<Map<String, dynamic>, Map<String, dynamic>>;
-
-    Map<String, dynamic> key = data.keys.elementAt(0);
-    Map<String, dynamic> value = data[key]!;
+    
     ThemeNotifier themeNotifier = Provider.of<ThemeNotifier>(context);
-
-    var chatContents = key['chatContents'];
     var selectedIndex = 0;
     MenuItem? selectedMenu = MenuItem.itemOne;
 
     //print("Received info: $value");
 
-    return Scaffold(
-        appBar: AppBar(
-            backgroundColor: themeNotifier.getAppBarColor(),
-            excludeHeaderSemantics: true,
-            centerTitle: true,
-            title: Text(
-                "${value['firstName']} ${value['middleName']} ${value['lastName']}"),
-            actions: <Widget>[
-              MenuAnchor(
-                builder: (BuildContext context, MenuController controller,
-                    Widget? child) {
-                  return IconButton(
+    return GradientScaffold(
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(60.0),
+          child: SafeArea(
+            child: AppBar(          
+                backgroundColor: themeNotifier.getAppBarColor(),
+                excludeHeaderSemantics: true,
+                //centerTitle: true,
+                elevation: 8,
+                leading: 
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back_ios_new),
+                      color: themeNotifier.getSubtitleColor(),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                title: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.green,
+                            width: 2,
+                          ),
+                        ),
+                        child: 
+                        const CircleAvatar(
+                          radius: 16,
+                          backgroundImage: AssetImage('assets/blank_profile_pic.png'),                    
+                        ),
+                      ),
+                      const SizedBox(width: 12.0),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center, 
+                            children: [
+                              Text(
+                                _getUsername(chatPartner),
+                                style: TextStyle(
+                                  color: themeNotifier.getTextColor(),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              const Text(
+                                "Online",
+                                style: TextStyle(
+                                  color: Colors.green,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                    ],              
+                  ),
+                  
+                ),
+
+                
+            
+              actions: [
+                Container(
+                  decoration: BoxDecoration(
+                  borderRadius:BorderRadius.circular(50) ,
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.green,
+                    ),
+                    BoxShadow(
+                      color: Colors.white70,
+                      spreadRadius: -5.0,
+                      blurRadius: 20.0,
+                    ),
+                  ],
+                ),
+                  child: ElevatedButton(
                     onPressed: () {
-                      if (controller.isOpen) {
-                        controller.close();
-                      } else {
-                        controller.open();
-                      }
+                      print("Camera pressed!");
                     },
-                    icon: const Icon(Icons.more_horiz),
-                    tooltip: 'Show menu',
-                  );
-                },
-                menuChildren: List<MenuItemButton>.generate(
-                  3,
-                  (int index) => MenuItemButton(
-                    onPressed: () =>
-                        setState(() => selectedMenu = MenuItem.values[index]),
-                    child: Text('Item${selectedIndex.toString()}'),
+                    style: ElevatedButton.styleFrom(
+                      shape: const CircleBorder(),
+                      backgroundColor: Colors.transparent, // gomb színe
+                      elevation: 0, // kikapcsoljuk az alap elevation-t
+                      padding: const EdgeInsets.all(6),
+                    ),
+                    child: const Icon(
+                      Icons.camera,
+                      color: Colors.white,
+                      size: 30,
+                    ),
                   ),
                 ),
-              ),
-            ]),
+                
+              ],
+            ),
+          ),
+        ),
         body: Container(
-          decoration: BoxDecoration(gradient: themeNotifier.getGradient()),
+          width: double.infinity,
+          height: double.infinity,
+          constraints: const BoxConstraints.expand(), // teljes képernyő
           child: Column(
             children: <Widget>[
               Expanded(
                   child: ListView.builder(
                 reverse: true,
-                itemCount: chatContents.length,
+                itemCount: messages.length,
                 itemBuilder: (context, index) {
-                  return MessengerCard(
-                      avatar: value['avatar'],
-                      content: Chatcontent.fromJson(chatContents[index]));
+                  return MessengerCard(content: messages[index]);
                 },
               )),
               const MyTextField()
@@ -85,14 +217,9 @@ class _MessageViewState extends State<MessageView> {
 }
 
 class MessengerCard extends StatelessWidget {
-  final String avatar;
   final Chatcontent content;
 
-  const MessengerCard({super.key, required this.avatar, required this.content});
-
-  bool messageIsFromUser(id) {
-    return id == 1491; //TOdo: get userId from storage
-  }
+  const MessengerCard({super.key, required this.content});
 
   @override
   Widget build(BuildContext context) {
@@ -101,15 +228,9 @@ class MessengerCard extends StatelessWidget {
       elevation: 0,
       color: Colors.transparent,
       child: ListTile(
-        leading: !messageIsFromUser(content.authorId)
-            ? UserAvatar(userAvatar: avatar)
-            : null,
-        trailing: messageIsFromUser(content.authorId)
-            ? UserAvatar(userAvatar: avatar)
-            : null,
         title: Wrap(children: [
           Row(
-            mainAxisAlignment: messageIsFromUser(content.authorId)
+            mainAxisAlignment: content.isAuthor
                 ? MainAxisAlignment.end
                 : MainAxisAlignment.start,
             children: [
@@ -118,18 +239,17 @@ class MessengerCard extends StatelessWidget {
                   gradient: const LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    stops: [0.1, 0.4, 0.9],
+                    stops: [0.1, 0.4],
                     colors: [
                       Color.fromARGB(179, 231, 229, 255),
-                      Color.fromARGB(88, 98, 90, 170),
-                      Color.fromARGB(87, 231, 229, 255),
+                      Color.fromARGB(179, 105, 99, 165),
                     ],
                   ),
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(3),
                   //color: Colors.transparent,
                   boxShadow: const [
                     BoxShadow(
-                        color: Color.fromARGB(60, 0, 0, 196), spreadRadius: 3),
+                        color: Color.fromARGB(60, 0, 0, 196), spreadRadius: 1),
                   ],
                 ),
                 child: Padding(
