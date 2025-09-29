@@ -1,28 +1,37 @@
 class Chatcontent {
-  int messageId;
-  int authorId;
-  int? chatContentId;
+  String publicId;
+  String chatRoomId;
+  String authorId;
   String message;
-  DateTime? sentDate;
+  bool isAuthor;
+  DateTime sentDate;
   Status status = Status.sent;
+  Object? chatFile;
 
   Chatcontent({
-    required this.messageId,
+    required this.publicId,
+    required this.chatRoomId,
     required this.authorId,
-    this.chatContentId,
     required this.message,
-    this.sentDate,
-    required this.status
+    required this.isAuthor,
+    required this.sentDate,
+    required this.status,
+    this.chatFile,
   });
 
   factory Chatcontent.fromJson(Map<String, dynamic> map) {
     return Chatcontent(
-      messageId: map['messageId'],
+      chatRoomId: map['chatRoomId'],
+      publicId: map['publicId'],
       authorId: map['authorId'],
-      chatContentId: map['chatContentId'],
       message: map['message'],
+      isAuthor: map['isAuthor'],
       sentDate: DateTime.parse(map['sentDate']),
-      status: Status.values.firstWhere((e) => e.index == map['status'])
+      status: Status.values.firstWhere(
+        (e) => e.name.toLowerCase() == (map['status'] as String).toLowerCase(),
+      ),
+      chatFile: map['chatFile']
+
     );
   }
 }
