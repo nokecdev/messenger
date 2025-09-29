@@ -22,10 +22,23 @@ class ThemeNotifier extends ChangeNotifier {
 
   Color getAppBarColor() {
     return theme == "default"
-        ? const Color(0xFF39B0D2)
+        ? const Color.fromARGB(255, 57, 111, 211)
         : theme == "dark"
             ? Colors.black
             : Colors.white70;
+  }
+
+  Color getTextAreaColor() {
+    switch (theme) {
+    case "dark":
+      return const Color.fromARGB(213, 29, 29, 29);
+    case "light":
+      return Colors.white30;
+    case "default":
+      return const Color.fromARGB(255, 132, 149, 197);
+    default:
+      return const Color.fromARGB(255, 132, 149, 197);
+    }
   }
 
   //Used in chatrooms chatcard title

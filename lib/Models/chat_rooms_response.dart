@@ -52,7 +52,7 @@ class UserDetailsDto {
   String publicId;
   String avatar;
   String firstName;
-  String middleName;
+  String? middleName = "";
   String lastName;
 
   UserDetailsDto({
@@ -68,7 +68,7 @@ class UserDetailsDto {
       publicId: json['publicId'] as String,
       avatar: json['avatar'] as String,
       firstName: json['firstName'] as String,
-      middleName: json['middleName'] as String,
+      middleName: json['middleName'] as String?,
       lastName: json['lastName'] as String,
     );
   }

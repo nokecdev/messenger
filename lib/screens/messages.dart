@@ -8,6 +8,7 @@ import 'package:signalr_chat/Services/api_service.dart';
 import 'package:signalr_chat/Storage/user_storage.dart';
 import 'package:signalr_chat/Widgets/States/theme_notifier.dart';
 import 'package:signalr_chat/Widgets/gradient_scaffold.dart';
+import 'package:signalr_chat/utils/factory.dart';
 
 class MessageView extends StatefulWidget {
   const MessageView({super.key});
@@ -29,15 +30,13 @@ class _MessageViewState extends State<MessageView> {
 
   @override
   void initState() {
-    super.initState();
-    
+    super.initState();    
     //Mivel még az initben nem elérhető az arg, lebuildeljük a kódot majd utólag kinyerjük a csetszoba Id-ját.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final args = ModalRoute.of(context)!.settings.arguments as ChatPartnerDto;
       setState(() {
-        chatPartner = args; //ChatPartnerDto.fromJson(args);      
+        chatPartner = args;
       });
-      print('received chatPartner:');
       initMessages();
     });
   }
@@ -55,11 +54,9 @@ class _MessageViewState extends State<MessageView> {
         Navigator.pushReplacementNamed(context, '/login');
         return;
       }
-      print("Room id: ${chatPartner.chatRoomId}");
       var resp = await apiService.getChatContents(chatPartner.chatRoomId);
       if (!mounted) return;
 
-      print(resp?.body);
       if (resp != null) {
 
         if (resp.statusCode == 200) {
@@ -68,14 +65,18 @@ class _MessageViewState extends State<MessageView> {
             messages = jsonList.map((e) => Chatcontent.fromJson(e)).toList()
           );
         }
+        else {
+          //TODO: Show error message
+        }
       }
       else {
-        //Failed to request from server
+        //TODO: Failed to request from server, show error message
       }
     }
     catch (e) {
       print("hiba.");
       print(e);
+      //TODO: Show error message
     }
   }
 
@@ -83,24 +84,95 @@ class _MessageViewState extends State<MessageView> {
     return "${chatPartner.firstName} ${chatPartner.middleName} ${chatPartner.lastName}";
   }
 
+  Widget _getMessagesHeader() {
+    return 
+      Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.black38,
+              border: Border.all(
+                color: Colors.grey.shade400,
+                width: 1,
+              ),
+              gradient: const LinearGradient(
+                begin: Alignment.bottomCenter,
+                end: Alignment.topCenter,
+                stops: [0.1, 0.3],
+                colors: [Colors.white, Colors.black]
+              ),
+            ),
+            child: Material(
+              type: MaterialType.transparency,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(999),
+                splashColor: Colors.white,
+                onTap: () {},
+                child: const Padding(
+                  padding: EdgeInsets.all(4.0),
+                  child: SizedBox(
+                    width: 32,
+                    height: 32,
+                    child: Icon(Icons.video_camera_front_sharp),
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          const SizedBox(width: 8),
+
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.black38,
+              border: Border.all(
+                color: Colors.grey.shade400,
+                width: 1,
+              ),
+              gradient: const LinearGradient(
+                begin: Alignment.bottomCenter,
+                end: Alignment.topCenter,
+                stops: [0.1, 0.3],
+                colors: [Colors.white, Colors.black]
+              ),                        ),
+            child: Material(
+              type: MaterialType.transparency,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(999),
+                splashColor: Colors.white,
+                onTap: () {},
+                child: const Padding(
+                  padding: EdgeInsets.all(4.0),
+                  child: SizedBox(
+                    width: 32,
+                    height: 32,
+                    child: Icon(Icons.phone),
+                  ),
+                ),
+              ),
+            ),
+          )
+        ],
+      )
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     
     ThemeNotifier themeNotifier = Provider.of<ThemeNotifier>(context);
-    var selectedIndex = 0;
-    MenuItem? selectedMenu = MenuItem.itemOne;
-
-    //print("Received info: $value");
 
     return GradientScaffold(
         appBar: PreferredSize(
-          preferredSize: Size.fromHeight(60.0),
+          preferredSize: const Size.fromHeight(60.0),
           child: SafeArea(
             child: AppBar(          
                 backgroundColor: themeNotifier.getAppBarColor(),
                 excludeHeaderSemantics: true,
-                //centerTitle: true,
                 elevation: 8,
                 leading: 
                     IconButton(
@@ -146,51 +218,17 @@ class _MessageViewState extends State<MessageView> {
                                 "Online",
                                 style: TextStyle(
                                   color: Colors.green,
-                                  fontSize: 12,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w900
                                 ),
                               ),
                             ],
                           ),
                     ],              
                   ),
-                  
                 ),
-
-                
-            
               actions: [
-                Container(
-                  decoration: BoxDecoration(
-                  borderRadius:BorderRadius.circular(50) ,
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.green,
-                    ),
-                    BoxShadow(
-                      color: Colors.white70,
-                      spreadRadius: -5.0,
-                      blurRadius: 20.0,
-                    ),
-                  ],
-                ),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      print("Camera pressed!");
-                    },
-                    style: ElevatedButton.styleFrom(
-                      shape: const CircleBorder(),
-                      backgroundColor: Colors.transparent, // gomb színe
-                      elevation: 0, // kikapcsoljuk az alap elevation-t
-                      padding: const EdgeInsets.all(6),
-                    ),
-                    child: const Icon(
-                      Icons.camera,
-                      color: Colors.white,
-                      size: 30,
-                    ),
-                  ),
-                ),
-                
+                _getMessagesHeader()                
               ],
             ),
           ),
@@ -220,82 +258,46 @@ class MessengerCard extends StatelessWidget {
   final Chatcontent content;
 
   const MessengerCard({super.key, required this.content});
-
+  
   @override
   Widget build(BuildContext context) {
+    ThemeNotifier themeNotifier = Provider.of<ThemeNotifier>(context);
+    
     return Card(
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
       elevation: 0,
       color: Colors.transparent,
       child: ListTile(
-        title: Wrap(children: [
-          Row(
-            mainAxisAlignment: content.isAuthor
-                ? MainAxisAlignment.end
-                : MainAxisAlignment.start,
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    stops: [0.1, 0.4],
-                    colors: [
-                      Color.fromARGB(179, 231, 229, 255),
-                      Color.fromARGB(179, 105, 99, 165),
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(3),
-                  //color: Colors.transparent,
-                  boxShadow: const [
-                    BoxShadow(
-                        color: Color.fromARGB(60, 0, 0, 196), spreadRadius: 1),
-                  ],
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 10.0, horizontal: 7.0),
-                  child: Text(content.message),
-                ),
-              ),
-            ],
+    title: Wrap(children: [
+      Row(
+        mainAxisAlignment: content.isAuthor
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              gradient: themeNotifier.getTextBoxHeader(),
+              borderRadius: BorderRadius.circular(3),
+              boxShadow: const [
+                BoxShadow(
+                    color: Color.fromARGB(60, 0, 0, 196), spreadRadius: 1),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                  vertical: 10.0, horizontal: 7.0),
+              child: Text(content.message),
+            ),
           ),
-        ]),
+        ],
       ),
+    ]),
+  
+    )
     );
   }
 }
 
-//Widget to display user's avatar
-class UserAvatar extends StatelessWidget {
-  final String userAvatar;
-
-  const UserAvatar({super.key, required this.userAvatar});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 50.0,
-      height: 50.0,
-      decoration: BoxDecoration(
-        color: const Color(0xff7c94b6),
-        image: DecorationImage(
-          image: userAvatar.isNotEmpty
-              ? NetworkImage(
-                  "https://storage.googleapis.com/socialstream/$userAvatar")
-              : const AssetImage('assets/blank_profile_pic.png')
-                  as ImageProvider,
-          fit: BoxFit.contain,
-        ),
-        borderRadius: const BorderRadius.all(Radius.circular(50.0)),
-        border: Border.all(
-          color: const Color(0xff7c94b6),
-          width: 1.0,
-        ),
-      ),
-    );
-  }
-}
 
 class MyTextField extends StatefulWidget {
   const MyTextField({super.key});
@@ -310,90 +312,97 @@ class _MyTextFieldState extends State<MyTextField> {
     ThemeNotifier themeNotifier = Provider.of<ThemeNotifier>(context);
 
     return Container(
-        color: const Color.fromARGB(255, 82, 73, 161),
+        color: themeNotifier.getTextAreaColor(),
         padding: const EdgeInsets.symmetric(vertical: 2.0),
         child: Column(
           mainAxisSize: MainAxisSize.max,
           children: [
-            Container(
-              decoration:
-                  BoxDecoration(gradient: themeNotifier.getTextBoxHeader()),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  IconButton(
-                      padding: const EdgeInsets.all(0.0),
-                      iconSize: 20.0,
-                      icon: const Icon(Icons.mic),
-                      onPressed: () {
-                        throw UnimplementedError("Microphone recording not yet implemented");
-                      },
-                      color: themeNotifier.theme == "dark"
-                          ? Colors.white
-                          : Colors.black),
-                  IconButton(
-                      padding: const EdgeInsets.all(0.0),
-                      iconSize: 20.0,
-                      icon: const Icon(Icons.image),
-                      onPressed: () {
-                        throw UnimplementedError("Image sending not yet implemented");
-                      },
-                      color: themeNotifier.theme == "dark"
-                          ? Colors.white
-                          : Colors.black),
-                  IconButton(
-                    padding: const EdgeInsets.all(10.0),
-                    iconSize: 20.0,
-                    icon: const Icon(Icons.emoji_emotions),
-                    color: themeNotifier.theme == "dark"
-                        ? Colors.white
-                        : Colors.black,
-                    onPressed: () {
-                      throw UnimplementedError("Emoji sending not yet implemented");
-                    },
+                children: [
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(24),
+                        gradient: themeNotifier.getTextBoxHeader(),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.1),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          /// Bal oldali +
+                          SizedBox(
+                            width: 34,
+                            height: 34,
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(10),
+                                splashFactory: InkRipple.splashFactory,
+                                splashColor: Colors.white24,
+                                onTap: () {},
+                                child: const Center(child: Icon(Icons.add, size: 18)),
+                              ),
+                            ),
+                          ),
+
+
+                            /// Szövegmező
+                          Expanded(
+                            child: TextField(
+                              style: TextStyle(color: themeNotifier.getTextColor()),
+                              decoration: InputDecoration(
+                                hintText: "Írj valamit...",
+                                hintStyle: TextStyle(color: Colors.grey.shade700),
+                                border: InputBorder.none,
+                                isDense: true,
+                                
+                                contentPadding: const EdgeInsets.all(8),
+                                fillColor: Color.lerp(Colors.black, Colors.black12, 4) 
+                              ),
+                              maxLines: 1,
+                            ),
+                          ),
+                          
+                          /// Küldés gomb
+                          SizedBox(
+                            width: 34,
+                            height: 34,
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(10),
+                                splashFactory: InkRipple.splashFactory,
+                                splashColor: Colors.white24,
+                                onTap: () {},
+                                child: const Center(child: Icon(Icons.send, size: 18)),
+                              ),
+                            ),
+                          ),
+
+                        ],
+                      ),
+                    ),
                   ),
+              
+                  const SizedBox(width: 8),
+              
+                  /// Mikrofon gomb
+                  createCircleButton(24, const Icon(Icons.mic, size: 18)),
+
+                  const SizedBox(width: 8),
+
+                  /// Kamera gomb
+                  createCircleButton(24, const Icon(Icons.camera_alt, size: 18)),
                 ],
               ),
-            ),
-            Row(children: [
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(0.0),
-                  child: Container(
-                      decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16.0),
-                          boxShadow: const [
-                            BoxShadow(
-                                color: Colors.grey,
-                                blurRadius: 2.0,
-                                spreadRadius: 0.4)
-                          ]),
-                      child: TextField(
-                        decoration: InputDecoration(
-                            labelStyle: const TextStyle(
-                                fontSize: 20.0, color: Colors.white),
-                            fillColor: const Color.fromARGB(179, 67, 68, 105),
-                            isDense: true,
-                            counterText: "",
-                            contentPadding: const EdgeInsets.all(10.0),
-                            filled: true,
-                            suffixIcon: IconButton(
-                              icon: const Icon(Icons.send),
-                              color: Colors.black,
-                              iconSize: 20.0,
-                              onPressed: () {},
-                            ),
-                            border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10.0),
-                                borderSide: BorderSide.none)),
-                        textAlign: TextAlign.start,
-                        maxLines: 1,
-                        maxLength: 20,
-                      )),
-                ),
-              ),
-            ])
+            )
           ],
         ));
   }

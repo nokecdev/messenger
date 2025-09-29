@@ -14,7 +14,12 @@ class ChatRoomHeader extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
         backgroundColor: themeNotifier.getAppBarColor(),
         centerTitle: true,
-        title: const Text('Chats'),
+        title: Text(
+          'Chats', 
+          style: TextStyle(
+            color: themeNotifier.getTextColor()
+          )
+        ),
         leading: GestureDetector(
           onTap: () => Scaffold.of(context).openDrawer(),
           child: const CircleAvatar(

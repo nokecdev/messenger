@@ -111,7 +111,7 @@ class GlobalTheme with ChangeNotifier {
   static const LinearGradient darkBackgroundGradient = LinearGradient(
      colors: [
       Colors.black,
-      Colors.black45
+      Color.fromARGB(255, 19, 19, 19),
     ],
     stops: [0, 1],
     begin: AlignmentDirectional(0, -1),
@@ -125,9 +125,9 @@ class GlobalTheme with ChangeNotifier {
     end: Alignment.bottomCenter,
     stops: [0.1, 0.4, 0.9],
     colors: [
-      Color.fromARGB(87, 231, 229, 255),
-      Color.fromARGB(88, 98, 90, 170),
-      Colors.transparent,
+      Color.fromARGB(31, 48, 37, 173),
+      Color.fromARGB(73, 43, 32, 146),
+      Color.fromARGB(55, 59, 47, 187),
     ],
   );
 
