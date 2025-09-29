@@ -3,12 +3,14 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:signalr_chat/Models/chat_partner_dto.dart';
 import 'package:signalr_chat/Models/chat_rooms_response.dart';
 import 'package:signalr_chat/Services/api_service.dart';
 import 'package:signalr_chat/Storage/user_storage.dart';
 import 'package:signalr_chat/Widgets/States/chat_room_header.dart';
 import 'package:signalr_chat/Widgets/States/chat_rooms_drawer.dart';
 import 'package:signalr_chat/Widgets/States/theme_notifier.dart';
+import 'package:signalr_chat/Widgets/gradient_scaffold.dart';
 import 'package:signalr_chat/Widgets/snackbar.dart';
 import 'package:signalr_chat/utils/methods.dart';
 
@@ -112,18 +114,43 @@ class _ChatRoomViewState extends State<ChatRoomView> {
       Navigator.pushReplacementNamed(context, '/login');
     }
   }
-
+// return Scaffold(
+//         body: AnnotatedRegion<SystemUiOverlayStyle>(
+//           value: SystemUiOverlayStyle.light,
+//           child: GestureDetector(
+//             onTap: () => FocusScope.of(context).unfocus(),
+//             child: Stack(
+//               children: <Widget>[
+//                 Container(
+//                   height: double.infinity,
+//                   width: double.infinity,
+//                   decoration: const BoxDecoration(
+//                     gradient: LinearGradient(
+//                       begin: Alignment.topCenter, 
+//                       end: Alignment.bottomCenter,
+//                       colors: [
+//                         Color(0xFF73AEF5),
+//                         Color(0xFF61A4F1),
+//                         Color(0xFF478DE0),
+//                         Color(0xFF398AE5)
+//                       ],
+//                       stops: [0.1, 0.4, 0.7, 0.9]
+//                     )
+//                   ),
+//                 ),
 
   @override
   Widget build(BuildContext context) {
     ThemeNotifier themeNotifier = Provider.of<ThemeNotifier>(context);
 
-    return Scaffold(
+    return GradientScaffold(
       drawer: const ChatRoomsDrawer(),
       appBar: const ChatRoomHeader(),
-      body: Container(
-          decoration: BoxDecoration(gradient: themeNotifier.getGradient()),
-          child: Column(children: <Widget>[
+      body: SizedBox(
+          width: double.infinity,
+          height: double.infinity, 
+          child: Column(
+            children: <Widget>[
             // Padding(
             //   padding: const EdgeInsets.all(12.0),
             //   child: TextField(
@@ -151,9 +178,7 @@ class _ChatRoomViewState extends State<ChatRoomView> {
                 final dateTime = DateTime.parse(endedTime);
                 final formattedTime = formatDate(dateTime);
                 var chatRoomId = rooms?[index].chatRoomId;
-                var totalChatRoom = rooms!.length - 1;
-                print("metadata ${roomMetadata?.total}");
-                print("total: ${index+1}");
+                var totalChatRoom = rooms == null ? 0 : rooms!.length - 1;
 
                 if (!hasMoreChatRoom && index == totalChatRoom) {
                   return const Center(
@@ -174,7 +199,16 @@ class _ChatRoomViewState extends State<ChatRoomView> {
                   color: Colors.transparent,
                   child: ListTile(
                     onTap: () async {
-                        await Navigator.pushNamed(context, '/messages', arguments: chatRoomId);
+                        if (chatPartner != null) {
+                          await Navigator.pushNamed(context, '/messages', 
+                            arguments: ChatPartnerDto(
+                              avatar: userAvatar, 
+                              firstName: chatPartner.firstName, 
+                              middleName: chatPartner.middleName ?? '',
+                              lastName: chatPartner.lastName,
+                              chatRoomId: chatRoomId ?? '')
+                          );
+                        }
                     },
                     leading: const CircleAvatar(
                       backgroundImage: AssetImage("assets/blank_profile_pic.png")
@@ -182,8 +216,18 @@ class _ChatRoomViewState extends State<ChatRoomView> {
                       //                   AssetImage("assets/blank_profile_pic.png") :
                       //                   NetworkImage(userAvatar.toString()) as ImageProvider
                     ),
-                    title: Text(title),
-                    subtitle: Text(lastMessage),
+                    title: Text(
+                      title, 
+                      style: TextStyle(
+                        color: themeNotifier.getTextColor()
+                      )
+                    ),
+                    subtitle: Text(
+                      lastMessage, 
+                      style: TextStyle(
+                        color: themeNotifier.getSubtitleColor()
+                      )
+                    ),
                     trailing: Column(
                       mainAxisAlignment: MainAxisAlignment.end,
                       crossAxisAlignment: CrossAxisAlignment.end,
@@ -196,7 +240,7 @@ class _ChatRoomViewState extends State<ChatRoomView> {
                         const SizedBox(height: 12), // kis távolság
                         Text(
                           formattedTime,
-                          style: const TextStyle(fontSize: 12),
+                          style: TextStyle(fontSize: 12, color: themeNotifier.getSecondaryTextColor()),
                           textAlign: TextAlign.center,
                         ),
                       ],

@@ -15,7 +15,7 @@ class GlobalTheme with ChangeNotifier {
   String get theme => _theme;
 
   Future<void> _loadTheme() async {
-    _theme = await storage.read(key: "theme") ?? "default";
+    _theme = await storage.read(key: "theme") ?? "dark";
     notifyListeners();
   }
 
@@ -80,7 +80,7 @@ class GlobalTheme with ChangeNotifier {
   }
 
   static final Color _defaultFocusColor =
-      const Color.fromARGB(255, 122, 86, 206).withValues(alpha: 0.12);
+      const Color(0xFF000000).withValues(alpha: 0.12);
   static final Color _lightFocusColor = Colors.black.withValues(alpha: 0.12);
   static final Color _darkFocusColor = Colors.white.withValues(alpha: 0.12);
 
@@ -109,11 +109,16 @@ class GlobalTheme with ChangeNotifier {
   );
 
   static const LinearGradient darkBackgroundGradient = LinearGradient(
-    colors: [Color.fromARGB(255, 13, 5, 20), Color.fromARGB(255, 34, 34, 34)],
+     colors: [
+      Colors.black,
+      Colors.black45
+    ],
     stops: [0, 1],
     begin: AlignmentDirectional(0, -1),
     end: AlignmentDirectional(0, 1),
-  );
+);
+
+
 
   static const LinearGradient textBoxHeaderDefault = LinearGradient(
     begin: Alignment.topCenter,
