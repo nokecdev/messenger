@@ -9,8 +9,9 @@ import 'package:signalr_chat/Storage/user_storage.dart';
 
 class ApiService {
   final storage = const FlutterSecureStorage();
-  final userEndpoint = "http://10.0.2.2:5002";
-  final chatEndpoint = "http://10.0.2.2:5050";
+  static const external = false; //Defines if I am developing from external device or emulator.
+  final userEndpoint = external ? "http://192.168.0.105:5002" : "http://10.0.2.2:5002";
+  final chatEndpoint = external ? "http://192.168.0.105:5050" : "http://10.0.2.2:5050";
   final log = Logger('ApiService');
   final userStorage = UserStorage();
 
@@ -49,4 +50,21 @@ class ApiService {
 
     return response;
   }
+
+  Future<Response?> getChatContents(String chatRoomId) async {
+    const pageIndex = 1;
+    const pageSize = 20;
+    final url = Uri.parse("$chatEndpoint/api/chat/load/messages?ChatRoomId=$chatRoomId&PageIndex=$pageIndex&PageSize=$pageSize");
+    String token = await userStorage.getToken();
+    var res = await http.get(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token'
+      },
+    );
+    return res;
+  }
+
+  
 }
