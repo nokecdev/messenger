@@ -1,83 +1,34 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' show WidgetRef, ConsumerWidget, ConsumerStatefulWidget, ConsumerState;
 import 'package:provider/provider.dart';
 import 'package:signalr_chat/Models/chat_content.dart';
 import 'package:signalr_chat/Models/chat_partner_dto.dart';
-import 'package:signalr_chat/Services/api_service.dart';
-import 'package:signalr_chat/Storage/user_storage.dart';
+import 'package:signalr_chat/Services/hub_connection.dart';
 import 'package:signalr_chat/Widgets/States/theme_notifier.dart';
 import 'package:signalr_chat/Widgets/gradient_scaffold.dart';
+import 'package:signalr_chat/utils/Provider.dart' show messagesProvider, chatPartnerProvider;
 import 'package:signalr_chat/utils/factory.dart';
 
-class MessageView extends StatefulWidget {
+class MessageView extends ConsumerStatefulWidget {
   const MessageView({super.key});
 
   @override
-  State<MessageView> createState() => _MessageViewState();
+  ConsumerState<MessageView> createState() => _MessageViewState();
 }
 
-enum MenuItem { itemOne, itemTwo, itemThree }
-
-class _MessageViewState extends State<MessageView> {
-  List<Chatcontent> messages = [];
-  var chatPartner = ChatPartnerDto(avatar: '', firstName: '', lastName: '', chatRoomId: '');
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
+class _MessageViewState extends ConsumerState<MessageView> {
   @override
   void initState() {
-    super.initState();    
-    //Mivel még az initben nem elérhető az arg, lebuildeljük a kódot majd utólag kinyerjük a csetszoba Id-ját.
+    super.initState();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final args = ModalRoute.of(context)!.settings.arguments as ChatPartnerDto;
-      setState(() {
-        chatPartner = args;
-      });
-      initMessages();
+      print("received chatpartner: ${args.chatPartnerId} | ${args.chatRoomId} | ${args.avatar}");
+      ref.read(chatPartnerProvider.notifier).setChatPartner(args);
+      ref.read(messagesProvider.notifier).loadMessages(args.chatRoomId);
     });
-  }
-
-  
-  Future<void> initMessages() async {
-    final userStorage = UserStorage();
-    final apiService = ApiService();
-
-    try {
-      final token = await userStorage.getToken();
-
-      if (token == null) {
-        if (!mounted) return;
-        Navigator.pushReplacementNamed(context, '/login');
-        return;
-      }
-      var resp = await apiService.getChatContents(chatPartner.chatRoomId);
-      if (!mounted) return;
-
-      if (resp != null) {
-
-        if (resp.statusCode == 200) {
-          final List<dynamic> jsonList = jsonDecode(resp.body);
-          setState(() => 
-            messages = jsonList.map((e) => Chatcontent.fromJson(e)).toList()
-          );
-        }
-        else {
-          //TODO: Show error message
-        }
-      }
-      else {
-        //TODO: Failed to request from server, show error message
-      }
-    }
-    catch (e) {
-      print("hiba.");
-      print(e);
-      //TODO: Show error message
-    }
   }
 
   String _getUsername(ChatPartnerDto chatPartner) {
@@ -163,9 +114,12 @@ class _MessageViewState extends State<MessageView> {
 
   @override
   Widget build(BuildContext context) {
-    
-    ThemeNotifier themeNotifier = Provider.of<ThemeNotifier>(context);
+    final messages = ref.watch(messagesProvider);
+    final chatPartner = ref.watch(chatPartnerProvider);
+    //TODO: Display error
+    if (chatPartner == null) return Container(child: Text("ERR"),);
 
+    ThemeNotifier themeNotifier = Provider.of<ThemeNotifier>(context);
     return GradientScaffold(
         appBar: PreferredSize(
           preferredSize: const Size.fromHeight(60.0),
@@ -298,18 +252,58 @@ class MessengerCard extends StatelessWidget {
   }
 }
 
-
-class MyTextField extends StatefulWidget {
+class MyTextField extends ConsumerStatefulWidget {
   const MyTextField({super.key});
 
   @override
-  State<MyTextField> createState() => _MyTextFieldState();
+  ConsumerState<MyTextField> createState() => _MyTextFieldState();
 }
 
-class _MyTextFieldState extends State<MyTextField> {
+
+class _MyTextFieldState extends ConsumerState<MyTextField> {
+  final TextEditingController textareaController = TextEditingController();
+  @override
+  void dispose() {
+    textareaController.dispose();
+    super.dispose();
+  }
+
+  void receiveMessage(WidgetRef ref, Map<String, dynamic> json) {
+    final message = Chatcontent.fromJson(json);
+    ref.read(messagesProvider.notifier).addMessage(message);
+  }
+
   @override
   Widget build(BuildContext context) {
     ThemeNotifier themeNotifier = Provider.of<ThemeNotifier>(context);
+    final TextEditingController textareaController = TextEditingController();
+    final chatPartner = ref.watch(chatPartnerProvider);
+    
+    Future<void> _sendMessage() async {
+      if (textareaController.text.isEmpty) return;
+
+      try {
+
+        print("text: ${textareaController.text} | chatpartner: ${chatPartner?.chatPartnerId} | chatroom: ${chatPartner?.chatRoomId}");
+        if (chatPartner == null) return;
+        var resp = await sendMessage(textareaController.text, chatPartner.chatRoomId, chatPartner.chatPartnerId);
+        if (resp == null) {
+          //TODO: show error message
+          return;
+        }
+
+        if (resp.statusCode == 200) {
+          var jsonBody = jsonDecode(resp.body);
+          var obj = Chatcontent.fromJson(jsonBody);
+          ref.read(messagesProvider.notifier).addMessage(obj);
+        }
+
+        textareaController.clear();
+      } catch (e) {
+        debugPrint("Send error: $e");
+      }
+    }
+    
 
     return Container(
         color: themeNotifier.getTextAreaColor(),
@@ -357,6 +351,7 @@ class _MyTextFieldState extends State<MyTextField> {
                           Expanded(
                             child: TextField(
                               style: TextStyle(color: themeNotifier.getTextColor()),
+                              controller: textareaController,
                               decoration: InputDecoration(
                                 hintText: "Írj valamit...",
                                 hintStyle: TextStyle(color: Colors.grey.shade700),
@@ -380,7 +375,7 @@ class _MyTextFieldState extends State<MyTextField> {
                                 borderRadius: BorderRadius.circular(10),
                                 splashFactory: InkRipple.splashFactory,
                                 splashColor: Colors.white24,
-                                onTap: () {},
+                                onTap: () => _sendMessage(),
                                 child: const Center(child: Icon(Icons.send, size: 18)),
                               ),
                             ),

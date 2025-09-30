@@ -72,11 +72,6 @@ class _LoadingViewState extends State<LoadingView> {
     }
   }
 
-  void loadChatRooms() async {
-    print("CSetszobák betöltése..");
-    Response? response = await apiService.getAllChatRoom();
-    print(response);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -86,8 +81,6 @@ class _LoadingViewState extends State<LoadingView> {
     switch (data['endpoint']) {
       case 'login':
         loginUser(data['email'], data['password']);
-      case 'rooms':
-        loadChatRooms();
     }
 
     return const Scaffold(

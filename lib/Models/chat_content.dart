@@ -4,6 +4,7 @@ class Chatcontent {
   String authorId;
   String message;
   bool isAuthor;
+  bool isDeleted;
   DateTime sentDate;
   Status status = Status.sent;
   Object? chatFile;
@@ -14,6 +15,7 @@ class Chatcontent {
     required this.authorId,
     required this.message,
     required this.isAuthor,
+    required this.isDeleted,
     required this.sentDate,
     required this.status,
     this.chatFile,
@@ -26,6 +28,7 @@ class Chatcontent {
       authorId: map['authorId'],
       message: map['message'],
       isAuthor: map['isAuthor'],
+      isDeleted: map['isDeleted'],
       sentDate: DateTime.parse(map['sentDate']),
       status: Status.values.firstWhere(
         (e) => e.name.toLowerCase() == (map['status'] as String).toLowerCase(),
@@ -39,5 +42,6 @@ class Chatcontent {
 enum Status {
   read,
   sent,
-  delivered
+  delivered,
+  unread,
 }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' as RiverPod;
+import 'package:signalr_chat/Services/hub_connection.dart';
 import 'package:signalr_chat/screens/chat_room.dart';
 import 'package:signalr_chat/Widgets/search_view.dart';
 import 'package:signalr_chat/Widgets/States/global_theme.dart';
@@ -10,8 +12,20 @@ import 'package:signalr_chat/Services/api_service.dart';
 import 'package:signalr_chat/Widgets/States/theme_notifier.dart';
 import 'package:signalr_chat/screens/login_screen.dart';
 
-void main() {
-  runApp(const AppProviders());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final container = RiverPod.ProviderContainer();
+
+  runApp(
+    RiverPod.UncontrolledProviderScope(
+      container: container,
+      child: const AppProviders(),
+    ),
+  );
+
+  await startConnection();
+  subscribeToConnection(container);
 }
 
 class AppProviders extends StatelessWidget {

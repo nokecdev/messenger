@@ -206,7 +206,8 @@ class _ChatRoomViewState extends State<ChatRoomView> {
                               firstName: chatPartner.firstName, 
                               middleName: chatPartner.middleName ?? '',
                               lastName: chatPartner.lastName,
-                              chatRoomId: chatRoomId ?? '')
+                              chatRoomId: chatRoomId ?? '',
+                              chatPartnerId: chatPartner.publicId)
                           );
                         }
                     },

@@ -4,13 +4,15 @@ class ChatPartnerDto {
   String? middleName;
   String lastName;
   String chatRoomId;
+  String chatPartnerId;
 
   ChatPartnerDto({
     required this.avatar,
     required this.firstName,
     this.middleName,
     required this.lastName,
-    required this.chatRoomId
+    required this.chatRoomId,
+    required this.chatPartnerId
   });
 
   factory ChatPartnerDto.fromJson(Map<String, dynamic> map) {
@@ -19,7 +21,8 @@ class ChatPartnerDto {
       firstName: map['firstName'],
       middleName: map['middleName'],
       lastName: map['lastName'],
-      chatRoomId: map['chatRoomId']
+      chatRoomId: map['chatRoomId'],
+      chatPartnerId: map['chatPartnerId']
     );
   }
 }

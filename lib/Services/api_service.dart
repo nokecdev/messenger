@@ -66,5 +66,22 @@ class ApiService {
     return res;
   }
 
-  
+  Future<Response?> sendMessage(String message, String roomId, String targetUserId) async {
+    String token = await userStorage.getToken();
+    var headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token'
+    };
+
+    var data = {
+      'message': message,
+      'chatRoomId': roomId,
+      'targetUserId': targetUserId
+    };
+    
+    var uri = Uri.parse("$chatEndpoint/api/chat/send/message");
+    var response = await http.post(uri, headers: headers, body: jsonEncode(data));
+
+    return response;
+  }  
 }
